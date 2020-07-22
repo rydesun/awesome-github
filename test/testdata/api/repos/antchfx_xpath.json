@@ -1,0 +1,29 @@
+{
+  "data": {
+    "repository": {
+      "description": "XPath package for Golang, supports HTML, XML, JSON document query.",
+      "forks": {
+        "totalCount": 36
+      },
+      "stargazers": {
+        "totalCount": 319
+      },
+      "watchers": {
+        "totalCount": 8
+      },
+      "defaultBranchRef": {
+        "target": {
+          "history": {
+            "edges": [
+              {
+                "node": {
+                  "committedDate": "2019-07-15T19:40:41Z"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

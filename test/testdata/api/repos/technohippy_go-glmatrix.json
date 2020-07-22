@@ -1,0 +1,29 @@
+{
+  "data": {
+    "repository": {
+      "description": "go-glmatrix is a golang version of glMatrix, which is \"designed to perform vector and matrix operations stupidly fast\".",
+      "forks": {
+        "totalCount": 0
+      },
+      "stargazers": {
+        "totalCount": 1
+      },
+      "watchers": {
+        "totalCount": 1
+      },
+      "defaultBranchRef": {
+        "target": {
+          "history": {
+            "edges": [
+              {
+                "node": {
+                  "committedDate": "2019-07-15T19:40:41Z"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

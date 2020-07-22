@@ -1,0 +1,29 @@
+{
+  "data": {
+    "repository": {
+      "description": "Go cross-platform glfw library for creating an OpenGL context and receiving events.",
+      "forks": {
+        "totalCount": 14
+      },
+      "stargazers": {
+        "totalCount": 65
+      },
+      "watchers": {
+        "totalCount": 6
+      },
+      "defaultBranchRef": {
+        "target": {
+          "history": {
+            "edges": [
+              {
+                "node": {
+                  "committedDate": "2019-07-15T19:40:41Z"
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

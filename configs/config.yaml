@@ -1,0 +1,6 @@
+access_token: <GitHub Personal Access Token>
+max_concurrent: 3
+start_point:
+  path: avelino/awesome-go
+
+log_resp_head: 50
