@@ -37,7 +37,7 @@ func TestGetConfig(t *testing.T) {
 		MaxConcurrent: 3,
 		StartPoint: StartPoint{
 			Path: "avelino/awesome-go",
-			Id: github.RepoID{
+			ID: github.RepoID{
 				Owner: "avelino",
 				Name:  "awesome-go",
 			},

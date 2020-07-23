@@ -95,7 +95,7 @@ func work(client *awg.Client, config config.Config, reporter *awg.Reporter) erro
 
 	// actual work
 	fmt.Fprintf(os.Stdout, "[2/3] Parse awesome page...\n")
-	awesomeRepos, err := awg.Workflow(client, reporter, config.Id)
+	awesomeRepos, err := awg.Workflow(client, reporter, config.ID)
 	if err != nil {
 		errMsg := "failed to fetch awesome repositories"
 		logger.Error(errMsg, zap.Error(err))

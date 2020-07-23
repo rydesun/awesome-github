@@ -15,7 +15,7 @@ type Config struct {
 
 type StartPoint struct {
 	Path          string
-	Id            github.RepoID
+	ID            github.RepoID
 	SectionFilter []string
 }
 

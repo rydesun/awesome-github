@@ -21,7 +21,7 @@ func (p *FlagParser) Parse() (Config, error) {
 		ConfigPath:  *configPath,
 		AccessToken: *accessToken,
 		StartPoint: StartPoint{
-			Id: github.RepoID{
+			ID: github.RepoID{
 				Owner: *user,
 				Name:  *name,
 			},

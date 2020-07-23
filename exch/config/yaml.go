@@ -41,7 +41,7 @@ func (p *YAMLParser) Parse() (Config, error) {
 		errcode.New("Invaild path",
 			ErrCodeParameter, ErrScope, []string{"path"})
 	}
-	config.StartPoint.Id.Owner = sliceStr[0]
-	config.StartPoint.Id.Name = sliceStr[1]
+	config.StartPoint.ID.Owner = sliceStr[0]
+	config.StartPoint.ID.Name = sliceStr[1]
 	return config, nil
 }
