@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -81,10 +82,15 @@ func TestGithubClient_GetUser(t *testing.T) {
 		user, err := testEnv.awgClient.GetUser()
 		require.Nil(err)
 		require.Equal("tester", user.Name)
+		require.Equal(5000, user.RateLimit.Total)
+		require.Equal(4999, user.RateLimit.Remaining)
+		require.NotEqual(time.Time{}, user.RateLimit.ResetAt)
 	} else {
 		user, err := testEnv.awgClient.GetUser()
 		require.Nil(err)
 		require.NotNil(user.Name)
+		require.Greater(0, user.RateLimit.Total)
+		require.NotEqual(time.Time{}, user.RateLimit.ResetAt)
 	}
 }
 

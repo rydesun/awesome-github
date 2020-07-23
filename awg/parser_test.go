@@ -39,7 +39,10 @@ func TestParser_Gather(t *testing.T) {
 	require.Nil(err)
 	t.Run("", func(t *testing.T) {
 		reporter := &Reporter{}
-		awesomeParser, err := NewParser(string(htmlReadme), client, reporter)
+		awesomeParser, err := NewParser(string(htmlReadme), client, reporter, RateLimit{
+			Total:     100000,
+			Remaining: 100000,
+		})
 		require.Nil(err)
 		awesomeRepos, err := awesomeParser.Gather()
 		require.Nil(err)
@@ -107,7 +110,10 @@ func TestParser_Gather(t *testing.T) {
 	// Test invalid README.md
 	t.Run("invalid-1", func(t *testing.T) {
 		reporter := &Reporter{}
-		awesomeParser, err := NewParser("", client, reporter)
+		awesomeParser, err := NewParser("", client, reporter, RateLimit{
+			Total:     100000,
+			Remaining: 100000,
+		})
 		require.Equal(nil, err)
 		_, err = awesomeParser.Gather()
 		require.NotEqual(nil, err)
@@ -115,9 +121,23 @@ func TestParser_Gather(t *testing.T) {
 	// Test invalid README.md
 	t.Run("invalid-2", func(t *testing.T) {
 		reporter := &Reporter{}
-		awesomeParser, err := NewParser("<h2><li>", client, reporter)
+		awesomeParser, err := NewParser("<h2><li>", client, reporter, RateLimit{
+			Total:     100000,
+			Remaining: 100000,
+		})
 		require.Equal(nil, err)
 		_, err = awesomeParser.Gather()
 		require.NotEqual(nil, err)
+	})
+	// Test ratelimit
+	t.Run("invalid-3", func(t *testing.T) {
+		reporter := &Reporter{}
+		awesomeParser, err := NewParser(string(htmlReadme), client, reporter, RateLimit{
+			Total:     100000,
+			Remaining: 0,
+		})
+		require.Nil(err)
+		_, err = awesomeParser.Gather()
+		require.NotNil(err)
 	})
 }

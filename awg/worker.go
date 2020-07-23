@@ -4,7 +4,8 @@ import (
 	"github.com/rydesun/awesome-github/exch/github"
 )
 
-func Workflow(client *Client, reporter *Reporter, awesomeID github.RepoID) (
+func Workflow(client *Client, reporter *Reporter, awesomeID github.RepoID,
+	ratelimit RateLimit) (
 	awesomeRepos map[string][]*AwesomeRepo, err error) {
 	logger := getLogger()
 	defer logger.Sync()
@@ -13,7 +14,7 @@ func Workflow(client *Client, reporter *Reporter, awesomeID github.RepoID) (
 	if err != nil {
 		return nil, err
 	}
-	readmeParser, err := NewParser(readme, client, reporter)
+	readmeParser, err := NewParser(readme, client, reporter, ratelimit)
 	if err != nil {
 		return nil, err
 	}

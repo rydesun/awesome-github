@@ -34,11 +34,19 @@ func TestWorkflow(t *testing.T) {
 	require.Nil(err)
 	client, err := NewClient(gbClient)
 	require.Nil(err)
-	result, err := Workflow(client, nil, github.RepoID{Owner: "tester", Name: "awesome-test"})
+	result, err := Workflow(client, nil, github.RepoID{Owner: "tester", Name: "awesome-test"},
+		RateLimit{
+			Total:     100000,
+			Remaining: 100000,
+		})
 	require.Nil(err)
 	require.Less(0, len(result))
 
 	// Test invalid, should have a error.
-	result, err = Workflow(client, nil, github.RepoID{Owner: "invalid", Name: "invalid"})
+	result, err = Workflow(client, nil, github.RepoID{Owner: "invalid", Name: "invalid"},
+		RateLimit{
+			Total:     100000,
+			Remaining: 100000,
+		})
 	require.NotNil(err)
 }

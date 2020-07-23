@@ -66,7 +66,7 @@ func work(client *awg.Client, config config.Config, reporter *awg.Reporter) erro
 	}
 	fmt.Fprintf(writer, "Use user(%s) access token.\n", user.Name)
 	fmt.Fprintf(writer, "RateLimit: total %d, remaining %d, reset at %s\n",
-		user.RateLimitTotal, user.RateLimitRemaining, user.RateLimitResetAt)
+		user.RateLimit.Total, user.RateLimit.Remaining, user.RateLimit.ResetAt)
 
 	finishBar := make(chan interface{})
 	go func() {
@@ -100,14 +100,14 @@ func work(client *awg.Client, config config.Config, reporter *awg.Reporter) erro
 
 	// actual work
 	fmt.Fprintf(writer, "[2/3] Parse awesome page...\n")
-	awesomeRepos, err := awg.Workflow(client, reporter, config.ID)
+	awesomeRepos, err := awg.Workflow(client, reporter, config.ID, user.RateLimit)
+	<-finishBar
 	if err != nil {
 		errMsg := "failed to fetch awesome repositories"
 		logger.Error(errMsg, zap.Error(err))
 		fmt.Fprintln(writer, strerr(err))
 		return err
 	}
-	<-finishBar
 
 	// output data
 	data, err := json.Marshal(awesomeRepos)

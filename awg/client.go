@@ -24,10 +24,12 @@ func (c *Client) GetUser() (*User, error) {
 		return nil, err
 	}
 	return &User{
-		Name:               user.Data.Viewer.Login,
-		RateLimitTotal:     user.Data.Ratelimit.Limit,
-		RateLimitRemaining: user.Data.Ratelimit.Remaining,
-		RateLimitResetAt:   user.Data.Ratelimit.ResetAt,
+		Name: user.Data.Viewer.Login,
+		RateLimit: RateLimit{
+			Total:     user.Data.Ratelimit.Limit,
+			Remaining: user.Data.Ratelimit.Remaining,
+			ResetAt:   user.Data.Ratelimit.ResetAt,
+		},
 	}, nil
 }
 

@@ -5,7 +5,8 @@ import "regexp"
 const (
 	ErrScope = "awg"
 
-	ErrCodeContent = 10
+	ErrCodeContent   = 10
+	ErrCodeRatelimit = 11
 )
 
 const xpathSection = `//div[@id='readme']

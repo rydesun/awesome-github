@@ -35,9 +35,13 @@ func (r *Repo) Aggregate(repo *github.Repo) error {
 	return nil
 }
 
+type RateLimit struct {
+	Total     int
+	Remaining int
+	ResetAt   time.Time
+}
+
 type User struct {
-	Name               string
-	RateLimitTotal     int
-	RateLimitRemaining int
-	RateLimitResetAt   time.Time
+	Name string
+	RateLimit
 }

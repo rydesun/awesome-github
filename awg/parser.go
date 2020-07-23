@@ -22,9 +22,11 @@ type Parser struct {
 	urlMust      string
 	reLink       *regexp.Regexp
 	reporter     *Reporter
+	ratelimit    RateLimit
 }
 
-func NewParser(readme string, client *Client, reporter *Reporter) (
+func NewParser(readme string, client *Client, reporter *Reporter,
+	rateLimit RateLimit) (
 	*Parser, error) {
 	const funcIntent = "parse awesome html readme page"
 	const funcErrMsg = "failed to " + funcIntent
@@ -49,6 +51,7 @@ func NewParser(readme string, client *Client, reporter *Reporter) (
 		urlMust:      urlMust,
 		reLink:       reLink,
 		reporter:     reporter,
+		ratelimit:    rateLimit,
 	}, nil
 }
 
@@ -84,7 +87,10 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 
 	// Section -> Index
 	// Item -> Repo
+
 	idxReposMap := make(map[string][]*Repo, len(sectionItemsMap))
+	// TODO: may be different with graphQL node number
+	var jobNum int
 	for sectionName, itemNodes := range sectionItemsMap {
 		repos := make([]*Repo, 0)
 		for _, itemNode := range itemNodes {
@@ -95,12 +101,20 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 				continue
 			}
 			repos = append(repos, repo)
+			jobNum++
 		}
 		idxReposMap[sectionName] = repos
 	}
+	if jobNum > p.ratelimit.Remaining {
+		errMsg := "Exceed GitHub API ratelimit"
+		logger.Warn(errMsg, zap.Error(err))
+		return nil, errcode.New(errMsg, ErrCodeRatelimit, ErrScope, nil)
+	}
+	if p.reporter != nil {
+		p.reporter.TotalRepoNum(jobNum)
+	}
 
 	var wg sync.WaitGroup
-	var jobNum int
 	idxAwReposMap := make(map[string][]*AwesomeRepo, len(idxReposMap))
 	for idx, repos := range idxReposMap {
 		for cnt, repo := range repos {
@@ -111,7 +125,6 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 			}
 			idxAwReposMap[idx] = append(idxAwReposMap[idx], awesomeRepo)
 			wg.Add(1)
-			jobNum++
 			go func(idx string, cnt int) {
 				defer wg.Done()
 				err := p.client.Fill(awesomeRepo)
@@ -128,9 +141,6 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 				}
 			}(idx, cnt)
 		}
-	}
-	if p.reporter != nil {
-		p.reporter.TotalRepoNum(jobNum)
 	}
 	wg.Wait()
 	return p.clean(idxAwReposMap), nil
