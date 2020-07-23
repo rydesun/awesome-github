@@ -1,11 +1,16 @@
+## Your GitHub personal access token, used to request GitHub API.
+## Prefer ${GITHUB_ACCESS_TOKEN} env var.
 access_token: <GitHub Personal Access Token>
+## Max concurrent requests to GitHub API.
 max_concurrent: 3
+## Crawler start point.
 start_point:
+  ## Awesome-XXX repostiory path, can be found in URL.
   path: avelino/awesome-go
 
 ## Output final JSON data.
-## default: stdout
 output:
+  ## default: stdout
   path: ./awg.json
 
 log:
