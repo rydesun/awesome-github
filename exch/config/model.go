@@ -10,6 +10,7 @@ type Config struct {
 	MaxConcurrent int    `yaml:"max_concurrent"`
 	LogRespHead   int    `yaml:"log_resp_head"`
 	StartPoint    `yaml:"start_point"`
+	Output        Output  `yaml:"output"`
 	Log           Loggers `yaml:"log"`
 }
 
@@ -17,6 +18,10 @@ type StartPoint struct {
 	Path          string
 	ID            github.RepoID
 	SectionFilter []string
+}
+
+type Output struct {
+	Path string `yaml:"path"`
 }
 
 func NewProtectedConfig(config Config) Config {

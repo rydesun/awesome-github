@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
@@ -104,14 +105,22 @@ func work(client *awg.Client, config config.Config, reporter *awg.Reporter) erro
 	}
 	<-finishBar
 
-	// print
+	// output data
 	data, err := json.Marshal(awesomeRepos)
 	if err != nil {
 		logger.DPanic(err.Error())
 		fmt.Println(err.Error())
 		return err
 	}
-	fmt.Println(string(data))
+	if len(config.Output.Path) != 0 {
+		err := ioutil.WriteFile(config.Output.Path, data, 0644)
+		if err != nil {
+			logger.DPanic(err.Error())
+			fmt.Println(err.Error())
+		}
+	} else {
+		fmt.Println(string(data))
+	}
 	fmt.Printf("Invalid repos: %v\n", reporter.GetInvalidRepo())
 	return nil
 }

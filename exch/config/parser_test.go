@@ -42,6 +42,9 @@ func TestGetConfig(t *testing.T) {
 				Name:  "awesome-go",
 			},
 		},
+		Output: Output{
+			Path: "./awg.json",
+		},
 		Log: Loggers{
 			Main: Logger{
 				Path: []string{"/tmp/awesome-github.log"},
