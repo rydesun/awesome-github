@@ -20,7 +20,7 @@ type LoggerConfig struct {
 	Encoding string
 }
 
-func setLoggers(config config.Config) (err error) {
+func setLoggers(config config.Config) (*zap.Logger, error) {
 	configPath := config.ConfigPath
 	defaultLoggerConfig := getLoggerConfig(configPath, config.Log.Main)
 	httpLoggerConfig := getLoggerConfig(configPath, config.Log.Http)
@@ -34,7 +34,7 @@ func setLoggers(config config.Config) (err error) {
 		DisableStacktrace: true,
 	}.Build()
 	if err != nil {
-		return
+		return nil, err
 	}
 	httpLogger, err := zap.Config{
 		Level:            zap.NewAtomicLevelAt(httpLoggerConfig.Level),
@@ -45,15 +45,14 @@ func setLoggers(config config.Config) (err error) {
 		ErrorOutputPaths: httpLoggerConfig.Path,
 	}.Build()
 	if err != nil {
-		return
+		return nil, err
 	}
-	setDefaultLogger(defaultLogger)
 	awg.SetDefaultLogger(defaultLogger)
 	errcode.SetDefaultLogger(defaultLogger)
 	github.SetDefaultLogger(defaultLogger)
 
 	cohttp.SetDefaultLogger(httpLogger)
-	return
+	return defaultLogger, nil
 }
 
 func getLoggerConfig(configPath string, config config.Logger) LoggerConfig {
