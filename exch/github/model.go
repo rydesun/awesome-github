@@ -50,6 +50,11 @@ type User struct {
 		Viewer struct {
 			Login string
 		}
+		Ratelimit struct {
+			Limit     int
+			Remaining int
+			ResetAt   time.Time
+		}
 	}
 	Errors []struct {
 		Message string

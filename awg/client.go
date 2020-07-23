@@ -18,13 +18,16 @@ func NewClient(client *github.Client) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) GetUser() (User, error) {
+func (c *Client) GetUser() (*User, error) {
 	user, err := c.gc.GetUser()
 	if err != nil {
-		return User{}, err
+		return nil, err
 	}
-	return User{
-		Name: user.Data.Viewer.Login,
+	return &User{
+		Name:               user.Data.Viewer.Login,
+		RateLimitTotal:     user.Data.Ratelimit.Limit,
+		RateLimitRemaining: user.Data.Ratelimit.Remaining,
+		RateLimitResetAt:   user.Data.Ratelimit.ResetAt,
 	}, nil
 }
 

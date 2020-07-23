@@ -65,6 +65,8 @@ func work(client *awg.Client, config config.Config, reporter *awg.Reporter) erro
 		return err
 	}
 	fmt.Fprintf(writer, "Use user(%s) access token.\n", user.Name)
+	fmt.Fprintf(writer, "RateLimit: total %d, remaining %d, reset at %s\n",
+		user.RateLimitTotal, user.RateLimitRemaining, user.RateLimitResetAt)
 
 	finishBar := make(chan interface{})
 	go func() {

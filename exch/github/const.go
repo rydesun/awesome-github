@@ -27,4 +27,4 @@ func NewDefaultClientOption() ClientOption {
 
 const QueryRepo = `{ "query": "query { repository(owner: \"%s\", name: \"%s\") { description forks { totalCount } stargazers { totalCount } watchers { totalCount } defaultBranchRef { target { ... on Commit { history(first: 1) { edges { node { committedDate } } } } } } } }" }`
 
-const QueryUser = `{ "query": "query { viewer { login }}"`
+const QueryUser = `{ "query": "query { viewer { login } rateLimit { limit, remaining, resetAt }}"`
