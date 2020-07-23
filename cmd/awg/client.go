@@ -108,26 +108,31 @@ func work(client *awg.Client, config config.Config, reporter *awg.Reporter) erro
 		fmt.Fprintln(writer, strerr(err))
 		return err
 	}
+	invalidRepos := reporter.GetInvalidRepo()
 
 	// output data
-	data, err := json.Marshal(awesomeRepos)
+	output := Output{
+		Time:    time.Now(),
+		Data:    awesomeRepos,
+		Invalid: invalidRepos,
+	}
+	outputBytes, err := json.Marshal(output)
 	if err != nil {
 		logger.DPanic(err.Error())
 		fmt.Fprintln(writer, strerr(err))
 		return err
 	}
 	if len(config.Output.Path) != 0 {
-		err := ioutil.WriteFile(config.Output.Path, data, 0644)
+		err := ioutil.WriteFile(config.Output.Path, outputBytes, 0644)
 		if err != nil {
 			logger.DPanic(err.Error())
 			fmt.Fprintln(writer, strerr(err))
 		}
 	} else {
-		fmt.Fprintln(writer, string(data))
+		fmt.Fprintln(writer, string(outputBytes))
 	}
 
 	// Warn some invalid repos.
-	invalidRepos := reporter.GetInvalidRepo()
 	if len(invalidRepos) > 0 {
 		fmt.Fprintf(writer, "\nCatch some invalid repos: %v\n", invalidRepos)
 	}
