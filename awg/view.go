@@ -8,18 +8,18 @@ import (
 )
 
 type Repo struct {
-	ID          github.RepoID
-	Owner       string
-	AwesomeName string
-	Link        string
-	Star        int
-	LastCommit  time.Time
-	Description string
+	ID          github.RepoID `json:"id"`
+	Owner       string        `json:"owner"`
+	AwesomeName string        `json:"awesome_name"`
+	Link        string        `json:"link"`
+	Star        int           `json:"star"`
+	LastCommit  time.Time     `json:"last_commit"`
+	Description string        `json:"description"`
 }
 
 type AwesomeRepo struct {
 	Repo
-	AwesomeDesc string
+	AwesomeDesc string `json:"awesome_description"`
 }
 
 func (r *Repo) Aggregate(repo *github.Repo) error {

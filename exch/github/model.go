@@ -6,8 +6,8 @@ import (
 )
 
 type RepoID struct {
-	Owner string
-	Name  string
+	Owner string `json:"owner"`
+	Name  string `json:"name"`
 }
 
 func (r RepoID) String() string {
