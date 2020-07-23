@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"go.uber.org/zap"
-	"gopkg.in/yaml.v2"
 
 	"github.com/rydesun/awesome-github/exch/config"
 )
@@ -37,15 +39,10 @@ func parseConfig() (config.Config, error) {
 }
 
 func inspectConfig(conf config.Config) error {
-	logger := getLogger()
-	defer logger.Sync()
-
-	confBytes, err := yaml.Marshal(config.NewProtectedConfig(conf))
-	if err != nil {
-		errMsg := "failed to inspect config"
-		logger.Warn(errMsg, zap.Error(err))
-		return err
-	}
-	logger.Info(string(confBytes))
+	writer := os.Stdout
+	fmt.Fprintf(writer, "config file: %s\n", conf.ConfigPath)
+	fmt.Fprintf(writer, "main log files: %s\n", conf.Log.Main.Path)
+	fmt.Fprintf(writer, "http log files: %s\n", conf.Log.Http.Path)
+	fmt.Fprintf(writer, "output file: %s\n", conf.Output.Path)
 	return nil
 }

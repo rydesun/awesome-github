@@ -53,16 +53,18 @@ func work(client *awg.Client, config config.Config, reporter *awg.Reporter) erro
 	defer logger.Sync()
 	logger.Info("awesome analysis instance begins")
 
+	writer := os.Stdout
+
 	// Check access token and user name.
-	fmt.Fprintf(os.Stdout, "[1/3] Checking access token...\n")
+	fmt.Fprintf(writer, "[1/3] Checking access token...\n")
 	user, err := client.GetUser()
 	if err != nil {
 		errMsg := "failed to get user info"
 		logger.Error(errMsg, zap.Error(err))
-		fmt.Println(strerr(err))
+		fmt.Fprintln(writer, strerr(err))
 		return err
 	}
-	fmt.Fprintf(os.Stdout, "Use user(%s) access token.\n", user.Name)
+	fmt.Fprintf(writer, "Use user(%s) access token.\n", user.Name)
 
 	finishBar := make(chan interface{})
 	go func() {
@@ -95,12 +97,12 @@ func work(client *awg.Client, config config.Config, reporter *awg.Reporter) erro
 	}()
 
 	// actual work
-	fmt.Fprintf(os.Stdout, "[2/3] Parse awesome page...\n")
+	fmt.Fprintf(writer, "[2/3] Parse awesome page...\n")
 	awesomeRepos, err := awg.Workflow(client, reporter, config.ID)
 	if err != nil {
 		errMsg := "failed to fetch awesome repositories"
 		logger.Error(errMsg, zap.Error(err))
-		fmt.Println(strerr(err))
+		fmt.Fprintln(writer, strerr(err))
 		return err
 	}
 	<-finishBar
@@ -109,18 +111,30 @@ func work(client *awg.Client, config config.Config, reporter *awg.Reporter) erro
 	data, err := json.Marshal(awesomeRepos)
 	if err != nil {
 		logger.DPanic(err.Error())
-		fmt.Println(err.Error())
+		fmt.Fprintln(writer, strerr(err))
 		return err
 	}
 	if len(config.Output.Path) != 0 {
 		err := ioutil.WriteFile(config.Output.Path, data, 0644)
 		if err != nil {
 			logger.DPanic(err.Error())
-			fmt.Println(err.Error())
+			fmt.Fprintln(writer, strerr(err))
 		}
 	} else {
-		fmt.Println(string(data))
+		fmt.Fprintln(writer, string(data))
 	}
-	fmt.Printf("Invalid repos: %v\n", reporter.GetInvalidRepo())
+
+	// Warn some invalid repos.
+	invalidRepos := reporter.GetInvalidRepo()
+	if len(invalidRepos) > 0 {
+		fmt.Fprintf(writer, "\nCatch some invalid repos: %v\n", invalidRepos)
+	}
+
+	// last message
+	if len(config.Output.Path) > 0 {
+		fmt.Fprintf(writer, "Done. Output file: %s\n", config.Output.Path)
+	} else {
+		fmt.Fprintln(writer, "Done.")
+	}
 	return nil
 }
