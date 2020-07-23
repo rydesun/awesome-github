@@ -25,8 +25,8 @@ func NewProtectedConfig(config Config) Config {
 }
 
 type Loggers struct {
-	Default Logger `yaml:"default"`
-	Http    Logger `yaml:"http"`
+	Main Logger `yaml:"main"`
+	Http Logger `yaml:"http"`
 }
 
 type Logger struct {

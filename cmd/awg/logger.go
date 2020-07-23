@@ -22,15 +22,16 @@ type LoggerConfig struct {
 
 func setLoggers(config config.Config) (err error) {
 	configPath := config.ConfigPath
-	defaultLoggerConfig := getLoggerConfig(configPath, config.Log.Default)
+	defaultLoggerConfig := getLoggerConfig(configPath, config.Log.Main)
 	httpLoggerConfig := getLoggerConfig(configPath, config.Log.Http)
 	defaultLogger, err := zap.Config{
-		Level:            zap.NewAtomicLevelAt(defaultLoggerConfig.Level),
-		Development:      false,
-		Encoding:         defaultLoggerConfig.Encoding,
-		EncoderConfig:    zap.NewDevelopmentEncoderConfig(),
-		OutputPaths:      defaultLoggerConfig.Path,
-		ErrorOutputPaths: defaultLoggerConfig.Path,
+		Level:             zap.NewAtomicLevelAt(defaultLoggerConfig.Level),
+		Development:       false,
+		Encoding:          defaultLoggerConfig.Encoding,
+		EncoderConfig:     zap.NewDevelopmentEncoderConfig(),
+		OutputPaths:       defaultLoggerConfig.Path,
+		ErrorOutputPaths:  defaultLoggerConfig.Path,
+		DisableStacktrace: true,
 	}.Build()
 	if err != nil {
 		return

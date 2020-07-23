@@ -3,4 +3,15 @@ max_concurrent: 3
 start_point:
   path: avelino/awesome-go
 
-log_resp_head: 50
+log:
+  ## Main log.
+  main:
+    ## default: stderr
+    path:
+      - /tmp/awesome-github.log
+
+  ## HTTP log.
+  http:
+    ## default: stderr
+    path:
+      - /tmp/awesome-github.log
