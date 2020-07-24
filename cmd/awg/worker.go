@@ -85,24 +85,31 @@ func (w *Worker) Work() error {
 	fmt.Fprintln(writer, "[2/3] Fetch and parse awesome README.md...")
 
 	// Progress bar.
-	var pbCompleted chan interface{}
+	var pbCompleted <-chan interface{}
+	var pbCancel chan<- interface{}
 	if !w.disableProgressBar {
-		pbCompleted = w.progressBar("[3/3] Fetch repositories from github...")
+		pbCompleted, pbCancel = w.progressBar("[3/3] Fetch repositories from github...")
 	} else {
 		fmt.Fprintln(writer, "[3/3] Fetch repositories from github...")
 	}
 
 	// Actual work.
 	awesomeRepos, err := awg.Workflow(w.awgClient, w.reporter, w.repoID, user.RateLimit)
-	if !w.disableProgressBar {
-		// Wait for the progress bar to complete.
-		<-pbCompleted
-	}
 	if err != nil {
-		errMsg := "Failed to fetch some repositories."
+		if !w.disableProgressBar {
+			logger.Info("Cancel progress bar.")
+			pbCancel <- nil
+			logger.Info("progress bar canceled.")
+		}
+		errMsg := "\nFailed to fetch some repositories."
 		fmt.Fprintln(writer, errMsg, strerr(err))
 		logger.Error(errMsg, zap.Error(err))
 		return err
+	}
+	if !w.disableProgressBar {
+		logger.Info("Wait for the progress bar to complete.")
+		<-pbCompleted
+		logger.Info("Progress bar finished.")
 	}
 	invalidRepos := w.reporter.GetInvalidRepo()
 
@@ -177,16 +184,29 @@ func (w *Worker) newAwgClient(config config.Config) (*awg.Client, error) {
 	return client, nil
 }
 
-func (w *Worker) progressBar(prefix string) (pbCompleted chan interface{}) {
-	pbCompleted = make(chan interface{})
-	go func() {
-		var numTotal int
+func (w *Worker) progressBar(prefix string) (completed <-chan interface{}, cancel chan<- interface{}) {
+	pbCompleted := make(chan interface{})
+	pbCancel := make(chan interface{})
+
+	// TODO: refactor later
+	getTotalNum := func() (numTotal int, canceled bool) {
+		ticker := time.NewTicker(time.Second)
 		for {
-			numTotal = w.reporter.GetTotalRepoNum()
-			if numTotal > 0 {
-				break
+			select {
+			case <-ticker.C:
+				numTotal = w.reporter.GetTotalRepoNum()
+				if numTotal > 0 {
+					return numTotal, false
+				}
+			case <-pbCancel:
+				return 0, true
 			}
-			time.Sleep(time.Second)
+		}
+	}
+	go func() {
+		numTotal, canceled := getTotalNum()
+		if canceled {
+			return
 		}
 		bar := progressbar.NewOptions(numTotal,
 			progressbar.OptionSetWriter(ansi.NewAnsiStdout()),
@@ -196,16 +216,22 @@ func (w *Worker) progressBar(prefix string) (pbCompleted chan interface{}) {
 			progressbar.OptionShowIts(),
 			progressbar.OptionShowCount(),
 		)
+		ticker := time.NewTicker(time.Second)
 		for {
-			numCompleted := w.reporter.GetFinishedRepoNum()
-			if numCompleted == numTotal {
-				bar.Finish()
-				break
+			select {
+			case <-pbCancel:
+				pbCompleted <- nil
+				return
+			case <-ticker.C:
+				numCompleted := w.reporter.GetFinishedRepoNum()
+				if numCompleted >= numTotal {
+					bar.Finish()
+					pbCompleted <- nil
+					return
+				}
+				bar.Set(numCompleted)
 			}
-			bar.Set(numCompleted)
-			time.Sleep(time.Second)
 		}
-		pbCompleted <- nil
 	}()
-	return pbCompleted
+	return pbCompleted, pbCancel
 }

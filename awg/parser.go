@@ -135,8 +135,7 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 					p.reporter.Done()
 				}
 				if err != nil {
-					_, isNetworkError := cohttp.IsNetowrkError(err)
-					if isNetworkError {
+					if cohttp.IsNetowrkError(err) {
 						networkError <- err
 					}
 					errMsg := "failed to fill repository info"

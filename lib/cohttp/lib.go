@@ -14,11 +14,7 @@ func truncate(raw []byte, maxLength int) (result []byte) {
 	}
 }
 
-func IsNetowrkError(err error) (int, bool) {
+func IsNetowrkError(err error) bool {
 	code, _, _ := errcode.Check(err)
-	if code < 100 {
-		return int(code), true
-	} else {
-		return 0, false
-	}
+	return code == ErrCodeNetwork
 }

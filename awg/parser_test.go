@@ -159,7 +159,6 @@ func TestParser_Gather(t *testing.T) {
 		require.Nil(err)
 		_, err = awesomeParser.Gather()
 		require.NotNil(err)
-		_, isNetworkErr := cohttp.IsNetowrkError(err)
-		require.True(isNetworkErr)
+		require.True(cohttp.IsNetowrkError(err))
 	})
 }
