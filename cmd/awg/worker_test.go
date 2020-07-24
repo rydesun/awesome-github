@@ -74,6 +74,26 @@ func TestWorker_work(t *testing.T) {
 		},
 		{
 			config: config.Config{
+				AccessToken: "123456",
+				StartPoint: config.StartPoint{
+					ID: github.RepoID{
+						Owner: "tester",
+						Name:  "awesome-test",
+					},
+				},
+				Github: config.Github{
+					HTMLHost: testEnv.htmlTestServer.URL,
+					ApiHost:  testEnv.apiTestServer.URL,
+				},
+				Cli: config.Cli{
+					// Enable progress bar
+					DisableProgressBar: false,
+				},
+			},
+			hasErr: false,
+		},
+		{
+			config: config.Config{
 				// Invalid
 				AccessToken: "invalid",
 				StartPoint: config.StartPoint{
