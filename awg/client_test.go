@@ -46,8 +46,9 @@ func (t *ClientTestEnv) Setup() error {
 			nil,
 			cohttp.NewClient(*testServer.Client(), 16, 2, time.Second, 20, nil),
 			github.ClientOption{
-				APIHost:    testServer.URL,
-				ApiPathPre: github.APIPathPre,
+				APIHost:     testServer.URL,
+				ApiPathPre:  github.APIPathPre,
+				AccessToken: "123456",
 			})
 	} else {
 		gbClient, err = github.NewClient(

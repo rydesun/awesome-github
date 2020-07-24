@@ -53,7 +53,12 @@ func ApiServer(testdataHolder DataHolder) (testServer *httptest.Server, err erro
 			return
 		}
 		if strings.Contains(string(raw), "login") {
-			rw.Write([]byte(jsonUser))
+			bear := req.Header.Get("Authorization")
+			if strings.HasSuffix(bear, "123456") {
+				rw.Write([]byte(jsonUser))
+			} else {
+				rw.WriteHeader(401)
+			}
 			return
 		}
 		if strings.Contains(string(raw), "antchfx") {
