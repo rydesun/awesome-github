@@ -11,6 +11,7 @@ type Config struct {
 	LogRespHead   int    `yaml:"log_resp_head"`
 	StartPoint    `yaml:"start_point"`
 	Output        Output  `yaml:"output"`
+	Cli           Cli     `yaml:"cli"`
 	Log           Loggers `yaml:"log"`
 }
 
@@ -27,6 +28,10 @@ type Output struct {
 func NewProtectedConfig(config Config) Config {
 	config.AccessToken = "<GitHub Personal Access Token>"
 	return config
+}
+
+type Cli struct {
+	DisableProgressBar bool `yaml:"disable_progress_bar"`
 }
 
 type Loggers struct {

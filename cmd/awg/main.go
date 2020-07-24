@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	// Use TUI
+	// CLI
 	writer := os.Stdout
 
 	// Always parse config first.

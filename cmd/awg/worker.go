@@ -25,6 +25,9 @@ type Worker struct {
 	reporter   *awg.Reporter
 	awgClient  *awg.Client
 	logger     *zap.Logger
+
+	// CLI settings
+	disableProgressBar bool
 }
 
 func NewWorker(writer io.Writer, logger *zap.Logger) *Worker {
@@ -57,6 +60,7 @@ func (w *Worker) Init(config config.Config) error {
 	w.repoID = config.ID
 	w.outputPath = config.ConfigPath
 	w.awgClient = awgClient
+	w.disableProgressBar = config.Cli.DisableProgressBar
 	return nil
 }
 
@@ -78,42 +82,22 @@ func (w *Worker) Work() error {
 	fmt.Fprintf(w.writer, "RateLimit: total %d, remaining %d, reset at %s\n",
 		user.RateLimit.Total, user.RateLimit.Remaining, user.RateLimit.ResetAt)
 
+	fmt.Fprintln(writer, "[2/3] Fetch and parse awesome README.md...")
+
 	// Progress bar.
-	pbCompleted := make(chan interface{})
-	go func() {
-		var numTotal int
-		for {
-			numTotal = w.reporter.GetTotalRepoNum()
-			if numTotal > 0 {
-				break
-			}
-			time.Sleep(time.Second)
-		}
-		bar := progressbar.NewOptions(numTotal,
-			progressbar.OptionSetWriter(ansi.NewAnsiStdout()),
-			progressbar.OptionEnableColorCodes(true),
-			progressbar.OptionSetWidth(15),
-			progressbar.OptionSetDescription("[3/3] Fetch repositories from github..."),
-			progressbar.OptionShowIts(),
-			progressbar.OptionShowCount(),
-		)
-		for {
-			numCompleted := w.reporter.GetFinishedRepoNum()
-			if numCompleted == numTotal {
-				bar.Finish()
-				break
-			}
-			bar.Set(numCompleted)
-			time.Sleep(time.Second)
-		}
-		pbCompleted <- nil
-	}()
+	var pbCompleted chan interface{}
+	if !w.disableProgressBar {
+		pbCompleted = w.progressBar("[3/3] Fetch repositories from github...")
+	} else {
+		fmt.Fprintln(writer, "[3/3] Fetch repositories from github...")
+	}
 
 	// Actual work.
-	fmt.Fprintln(writer, "[2/3] Fetch and parse awesome README.md...")
 	awesomeRepos, err := awg.Workflow(w.awgClient, w.reporter, w.repoID, user.RateLimit)
-	// Wait for the progress bar to complete.
-	<-pbCompleted
+	if !w.disableProgressBar {
+		// Wait for the progress bar to complete.
+		<-pbCompleted
+	}
 	if err != nil {
 		errMsg := "Failed to fetch some repositories."
 		fmt.Fprintln(writer, errMsg, strerr(err))
@@ -191,4 +175,37 @@ func (w *Worker) newAwgClient(config config.Config) (*awg.Client, error) {
 		return nil, err
 	}
 	return client, nil
+}
+
+func (w *Worker) progressBar(prefix string) (pbCompleted chan interface{}) {
+	pbCompleted = make(chan interface{})
+	go func() {
+		var numTotal int
+		for {
+			numTotal = w.reporter.GetTotalRepoNum()
+			if numTotal > 0 {
+				break
+			}
+			time.Sleep(time.Second)
+		}
+		bar := progressbar.NewOptions(numTotal,
+			progressbar.OptionSetWriter(ansi.NewAnsiStdout()),
+			progressbar.OptionEnableColorCodes(true),
+			progressbar.OptionSetWidth(15),
+			progressbar.OptionSetDescription(prefix),
+			progressbar.OptionShowIts(),
+			progressbar.OptionShowCount(),
+		)
+		for {
+			numCompleted := w.reporter.GetFinishedRepoNum()
+			if numCompleted == numTotal {
+				bar.Finish()
+				break
+			}
+			bar.Set(numCompleted)
+			time.Sleep(time.Second)
+		}
+		pbCompleted <- nil
+	}()
+	return pbCompleted
 }
