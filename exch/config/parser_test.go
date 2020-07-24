@@ -6,8 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/rydesun/awesome-github/exch/github"
 	"github.com/stretchr/testify/require"
+
+	"github.com/rydesun/awesome-github/exch/github"
 )
 
 const testAccessToken = "123456"

@@ -8,14 +8,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/k0kubun/go-ansi"
+	"github.com/schollz/progressbar/v3"
 	"go.uber.org/zap"
 
-	"github.com/k0kubun/go-ansi"
 	"github.com/rydesun/awesome-github/awg"
 	"github.com/rydesun/awesome-github/exch/config"
 	"github.com/rydesun/awesome-github/exch/github"
 	"github.com/rydesun/awesome-github/lib/cohttp"
-	"github.com/schollz/progressbar/v3"
 )
 
 type Worker struct {
