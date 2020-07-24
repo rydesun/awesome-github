@@ -225,5 +225,6 @@ func (c *Client) Json(req *http.Request, respJson interface{}) error {
 		logger.Error(errMsg, logField...)
 		return err
 	}
-	return nil
+	// Must return err!
+	return err
 }

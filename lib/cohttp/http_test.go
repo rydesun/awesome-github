@@ -23,11 +23,18 @@ func init() {
 		if req.URL.Path == "/json" {
 			rw.Write([]byte(`{"foo": "bar"}`))
 		}
+		// Invalid path
 		if req.URL.Path == "/json/wrong_path" {
 			rw.WriteHeader(500)
 		}
+		// Invalid json data
 		if req.URL.Path == "/json/invalid" {
 			rw.Write([]byte(`{`))
+		}
+		// Unauthorized but has valid json data
+		if req.URL.Path == "/json/error" {
+			rw.WriteHeader(401)
+			rw.Write([]byte(`{"err": "error message"}`))
 		}
 	}
 	testServer = httptest.NewServer(http.HandlerFunc(handler))
@@ -101,6 +108,10 @@ func TestClient_Json(t *testing.T) {
 		},
 		{
 			in:     "/json/invalid",
+			hasErr: true,
+		},
+		{
+			in:     "/json/error",
 			hasErr: true,
 		},
 		{

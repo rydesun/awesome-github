@@ -9,6 +9,7 @@ import (
 
 	"go.uber.org/zap"
 
+	"github.com/rydesun/awesome-github/lib/cohttp"
 	"github.com/rydesun/awesome-github/lib/errcode"
 )
 
@@ -96,8 +97,13 @@ func (c *Client) GetUser() (*User, error) {
 	err = c.apiClient.Json(req, user)
 	if err != nil {
 		logger.Error(funcErrMsg, zap.Error(err))
-		err = errcode.Wrap(err, funcErrMsg)
-		return nil, err
+		code, scope, _ := errcode.Check(err)
+		if scope == cohttp.ErrScope && code == 401 {
+			errMsg := "Invalid access token"
+			return nil, errcode.New(errMsg,
+				ErrCodeAccessToken, ErrScope, nil)
+		}
+		return nil, errcode.Wrap(err, funcErrMsg)
 	}
 	if len(user.Errors) > 0 {
 		errMsg := "remote server return errors"

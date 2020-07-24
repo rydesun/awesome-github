@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/rydesun/awesome-github/awg"
+	"github.com/rydesun/awesome-github/exch/github"
 	"github.com/rydesun/awesome-github/lib/cohttp"
 	"github.com/rydesun/awesome-github/lib/errcode"
 )
@@ -13,6 +14,11 @@ func strerr(err error) string {
 		switch code {
 		case awg.ErrCodeRatelimit:
 			return "Exceed GitHub API ratelimit."
+		}
+	case github.ErrScope:
+		switch code {
+		case github.ErrCodeAccessToken:
+			return "Invalid github personal access token."
 		}
 	case cohttp.ErrScope:
 		switch code {

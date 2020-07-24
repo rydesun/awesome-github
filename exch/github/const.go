@@ -7,6 +7,7 @@ const (
 	ErrCodeClientOption = 11
 	ErrCodeMakeRequest  = 20
 	ErrCodeNetwork      = 30
+	ErrCodeAccessToken  = 40
 )
 
 const (
