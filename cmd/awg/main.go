@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"os"
 
 	"github.com/rydesun/awesome-github/exch/config"
@@ -13,7 +12,7 @@ func main() {
 	writer := os.Stdout
 
 	// Always parse config first.
-	config, err := parseConfig(writer)
+	config, err := parseConfig()
 	if err != nil {
 		fmt.Fprintln(writer, err)
 		os.Exit(1)
@@ -40,7 +39,7 @@ func main() {
 	}
 }
 
-func parseConfig(writer io.Writer) (config.Config, error) {
+func parseConfig() (config.Config, error) {
 	flagParser := config.FlagParser{}
 	flags, err := flagParser.Parse()
 	if err != nil {
