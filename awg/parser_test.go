@@ -140,4 +140,24 @@ func TestParser_Gather(t *testing.T) {
 		_, err = awesomeParser.Gather()
 		require.NotNil(err)
 	})
+	// Test invalid network
+	invalidGbClient, _ := github.NewClient(htmlClient, apiClient,
+		github.ClientOption{
+			HTMLHost:    htmlTestServer.URL,
+			HTMLPathPre: github.HTMLPathPre,
+			// Invalid API network
+			APIHost:    "https://127.127.127.127:12345",
+			ApiPathPre: github.APIPathPre,
+		})
+	invalidClient, _ := NewClient(invalidGbClient)
+	t.Run("invalid-4", func(t *testing.T) {
+		reporter := &Reporter{}
+		awesomeParser, err := NewParser(string(htmlReadme), invalidClient, reporter, RateLimit{
+			Total:     100000,
+			Remaining: 100000,
+		})
+		require.Nil(err)
+		_, err = awesomeParser.Gather()
+		require.NotNil(err)
+	})
 }

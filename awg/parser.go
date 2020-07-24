@@ -11,6 +11,7 @@ import (
 	"golang.org/x/net/html"
 
 	"github.com/rydesun/awesome-github/exch/github"
+	"github.com/rydesun/awesome-github/lib/cohttp"
 	"github.com/rydesun/awesome-github/lib/errcode"
 )
 
@@ -114,7 +115,9 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 		p.reporter.TotalRepoNum(jobNum)
 	}
 
+	// Fetch repositories from remote
 	var wg sync.WaitGroup
+	networkError := make(chan interface{})
 	idxAwReposMap := make(map[string][]*AwesomeRepo, len(idxReposMap))
 	for idx, repos := range idxReposMap {
 		for cnt, repo := range repos {
@@ -132,6 +135,11 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 					p.reporter.Done()
 				}
 				if err != nil {
+					_, isNetworkError := cohttp.IsNetowrkError(err)
+					if isNetworkError {
+						networkError <- nil
+						return
+					}
 					errMsg := "failed to fill repository info"
 					logger.Error(errMsg, zap.Error(err))
 					if p.reporter != nil {
@@ -142,8 +150,18 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 			}(idx, cnt)
 		}
 	}
-	wg.Wait()
-	return p.clean(idxAwReposMap), nil
+	jobsCompleted := make(chan interface{})
+	go func() {
+		wg.Wait()
+		jobsCompleted <- nil
+	}()
+	select {
+	case <-networkError:
+		errMsg := "Network Error occurs"
+		return nil, errcode.New(errMsg, ErrCodeNetwork, ErrScope, nil)
+	case <-jobsCompleted:
+		return p.clean(idxAwReposMap), nil
+	}
 }
 
 // Remove invalid nil from map.

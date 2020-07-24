@@ -7,7 +7,7 @@ import (
 )
 
 func strerr(err error) string {
-	code, scope, _ := errcode.Check(err)
+	code, scope, objects := errcode.Check(err)
 	switch scope {
 	case awg.ErrScope:
 		switch code {
@@ -17,7 +17,12 @@ func strerr(err error) string {
 	case cohttp.ErrScope:
 		switch code {
 		case cohttp.ErrCodeNetwork:
-			return "Network error occurs. Check your network connection."
+			msg := "Network error occurs. Check your network connection."
+			if len(objects) == 0 {
+				return msg
+			}
+			msg = msg + "\n" + objects[0]
+			return msg
 		}
 	}
 	return err.Error()

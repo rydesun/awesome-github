@@ -71,7 +71,8 @@ func (c *Client) Do(req *http.Request) (resp *http.Response, err error) {
 		logger.Error(funcErrMsg, zap.Error(err),
 			zap.String("method", method),
 			zap.String("url", url))
-		err = errcode.New(funcErrMsg, ErrCodeNetwork, ErrScope, nil)
+		err = errcode.New(funcErrMsg, ErrCodeNetwork, ErrScope,
+			[]string{err.Error()})
 		return
 	}
 

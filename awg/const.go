@@ -7,6 +7,7 @@ const (
 
 	ErrCodeContent   = 10
 	ErrCodeRatelimit = 11
+	ErrCodeNetwork   = 12
 )
 
 const xpathSection = `//div[@id='readme']
