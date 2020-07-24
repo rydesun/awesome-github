@@ -213,7 +213,7 @@ func (p *Parser) parseItem(itemNode *html.Node) (*Repo, error) {
 	defer logger.Sync()
 	logger.Debug(funcIntent)
 
-	linkNode, err := htmlquery.Query(itemNode, "//a")
+	linkNode, err := p.getLinks(itemNode)
 	if err != nil {
 		const blockErrMsg = "failed to get first link node from item node"
 		logger.Error(blockErrMsg, zap.Error(err))
