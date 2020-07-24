@@ -58,7 +58,7 @@ func (w *Worker) Init(config config.Config) error {
 	}
 
 	w.repoID = config.ID
-	w.outputPath = config.ConfigPath
+	w.outputPath = config.Output.Path
 	w.awgClient = awgClient
 	w.disableProgressBar = config.Cli.DisableProgressBar
 	return nil
