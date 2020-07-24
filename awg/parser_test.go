@@ -145,7 +145,7 @@ func TestParser_Gather(t *testing.T) {
 		github.ClientOption{
 			HTMLHost:    htmlTestServer.URL,
 			HTMLPathPre: github.HTMLPathPre,
-			// Invalid API network
+			// Invalid network for GitHub API
 			APIHost:    "https://127.127.127.127:12345",
 			ApiPathPre: github.APIPathPre,
 		})
@@ -159,5 +159,7 @@ func TestParser_Gather(t *testing.T) {
 		require.Nil(err)
 		_, err = awesomeParser.Gather()
 		require.NotNil(err)
+		_, isNetworkErr := cohttp.IsNetowrkError(err)
+		require.True(isNetworkErr)
 	})
 }

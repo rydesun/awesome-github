@@ -117,7 +117,7 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 
 	// Fetch repositories from remote
 	var wg sync.WaitGroup
-	networkError := make(chan interface{})
+	networkError := make(chan error)
 	idxAwReposMap := make(map[string][]*AwesomeRepo, len(idxReposMap))
 	for idx, repos := range idxReposMap {
 		for cnt, repo := range repos {
@@ -137,8 +137,7 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 				if err != nil {
 					_, isNetworkError := cohttp.IsNetowrkError(err)
 					if isNetworkError {
-						networkError <- nil
-						return
+						networkError <- err
 					}
 					errMsg := "failed to fill repository info"
 					logger.Error(errMsg, zap.Error(err))
@@ -156,9 +155,9 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 		jobsCompleted <- nil
 	}()
 	select {
-	case <-networkError:
-		errMsg := "Network Error occurs"
-		return nil, errcode.New(errMsg, ErrCodeNetwork, ErrScope, nil)
+	case err := <-networkError:
+		errMsg := "Network error occurs"
+		return nil, errcode.Wrap(err, errMsg)
 	case <-jobsCompleted:
 		return p.clean(idxAwReposMap), nil
 	}
