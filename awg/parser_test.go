@@ -19,20 +19,15 @@ func TestParser_Gather(t *testing.T) {
 	require.Nil(err)
 	testdataDir := path.Join(wd, "../test/testdata")
 	testdataHolder := fakeg.NewDataHolder(testdataDir)
-	htmlTestServer, err := fakeg.ApiServer(testdataHolder)
-	require.Nil(err)
 	apiTestServer, err := fakeg.ApiServer(testdataHolder)
 	require.Nil(err)
 	htmlReadme, err := testdataHolder.GetHtmlAwesomeReadme()
 	require.Nil(err)
-	htmlClient := cohttp.NewClient(*htmlTestServer.Client(), 16, 2, time.Second, 20, nil)
 	apiClient := cohttp.NewClient(*apiTestServer.Client(), 16, 2, time.Second, 20, nil)
-	gbClient, err := github.NewClient(htmlClient, apiClient,
+	gbClient, err := github.NewClient(nil, apiClient,
 		github.ClientOption{
-			HTMLHost:    htmlTestServer.URL,
-			HTMLPathPre: github.HTMLPathPre,
-			APIHost:     apiTestServer.URL,
-			ApiPathPre:  github.APIPathPre,
+			APIHost:    apiTestServer.URL,
+			ApiPathPre: github.APIPathPre,
 		})
 	require.Nil(err)
 	client, err := NewClient(gbClient)
@@ -141,10 +136,8 @@ func TestParser_Gather(t *testing.T) {
 		require.NotNil(err)
 	})
 	// Test invalid network
-	invalidGbClient, _ := github.NewClient(htmlClient, apiClient,
+	invalidGbClient, _ := github.NewClient(nil, apiClient,
 		github.ClientOption{
-			HTMLHost:    htmlTestServer.URL,
-			HTMLPathPre: github.HTMLPathPre,
 			// Invalid network for GitHub API
 			APIHost:    "https://127.127.127.127:12345",
 			ApiPathPre: github.APIPathPre,
