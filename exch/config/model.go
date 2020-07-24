@@ -14,6 +14,7 @@ type Config struct {
 	StartPoint    `yaml:"start_point"`
 	Network       Net     `yaml:"network"`
 	Output        Output  `yaml:"output"`
+	Github        Github  `yaml:"github"`
 	Cli           Cli     `yaml:"cli"`
 	Log           Loggers `yaml:"log"`
 }
@@ -36,6 +37,11 @@ type Output struct {
 func NewProtectedConfig(config Config) Config {
 	config.AccessToken = "<GitHub Personal Access Token>"
 	return config
+}
+
+type Github struct {
+	HTMLHost string `yaml:"html_host"`
+	ApiHost  string `yaml:"api_host"`
 }
 
 type Cli struct {

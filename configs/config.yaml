@@ -22,6 +22,11 @@ output:
 cli:
   disable_progress_bar: false
 
+## GitHub server settings.
+github:
+  # html_host: ""
+  # api_host: ""
+
 log:
   ## Main log.
   main:

@@ -167,8 +167,16 @@ func (w *Worker) newAwgClient(config config.Config) (*awg.Client, error) {
 	apiClient := cohttp.NewClient(http.Client{},
 		config.MaxConcurrent, config.Network.RetryTime,
 		config.Network.RetryInterval, config.LogRespHead, w.reporter)
+
 	options := github.NewDefaultClientOption()
 	options.AccessToken = config.AccessToken
+	if len(config.Github.HTMLHost) > 0 {
+		options.HTMLHost = config.Github.HTMLHost
+	}
+	if len(config.Github.ApiHost) > 0 {
+		options.APIHost = config.Github.ApiHost
+	}
+
 	gc, err := github.NewClient(htmlClient, apiClient, options)
 	if err != nil {
 		errMsg := "Failed to create github client."
