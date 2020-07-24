@@ -8,6 +8,11 @@ start_point:
   ## Awesome-XXX repostiory path, can be found in URL.
   path: avelino/awesome-go
 
+network:
+  ## Retry request if network error occurs.
+  retry_time: 2
+  retry_interval: 1s
+
 ## Output final JSON data.
 output:
   ## default: stdout

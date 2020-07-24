@@ -25,8 +25,8 @@ func TestParser_Gather(t *testing.T) {
 	require.Nil(err)
 	htmlReadme, err := testdataHolder.GetHtmlAwesomeReadme()
 	require.Nil(err)
-	htmlClient := cohttp.NewClient(*htmlTestServer.Client(), 16, 20, nil)
-	apiClient := cohttp.NewClient(*apiTestServer.Client(), 16, 20, nil)
+	htmlClient := cohttp.NewClient(*htmlTestServer.Client(), 16, 2, time.Second, 20, nil)
+	apiClient := cohttp.NewClient(*apiTestServer.Client(), 16, 2, time.Second, 20, nil)
 	gbClient, err := github.NewClient(htmlClient, apiClient,
 		github.ClientOption{
 			HTMLHost:    htmlTestServer.URL,

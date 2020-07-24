@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/rydesun/awesome-github/exch/github"
 	"github.com/stretchr/testify/require"
@@ -41,6 +42,10 @@ func TestGetConfig(t *testing.T) {
 				Owner: "avelino",
 				Name:  "awesome-go",
 			},
+		},
+		Network: Net{
+			RetryTime:     2,
+			RetryInterval: time.Second,
 		},
 		Output: Output{
 			Path: "./awg.json",

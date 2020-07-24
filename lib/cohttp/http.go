@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"go.uber.org/zap"
 
@@ -18,15 +19,21 @@ type Client struct {
 	c             *http.Client
 	queue         chan interface{}
 	MaxConcurrent int
+	RetryTime     int
+	RetryInterval time.Duration
 	logRespHead   int
 	reporter      Reporter
 }
 
-func NewClient(client http.Client, maxConcurrent int, logRespHead int,
-	reporter Reporter) *Client {
+func NewClient(client http.Client, maxConcurrent int,
+	retryTime int, retryInterval time.Duration,
+	logRespHead int, reporter Reporter) *Client {
 	var queue chan interface{}
 	if maxConcurrent > 0 {
 		queue = make(chan interface{}, maxConcurrent)
+	}
+	if retryTime < 0 {
+		retryTime = 0
 	}
 	return &Client{
 		c:             &client,
@@ -97,7 +104,18 @@ func (c *Client) DoBetter(req *http.Request) (
 		zap.String("method", method),
 		zap.String("url", url))
 
-	resp, err := c.Do(req)
+	var resp *http.Response
+	for i := 0; i < c.RetryTime+1; i++ {
+		resp, err = c.Do(req)
+		if err == nil {
+			break
+		}
+		logger.Warn(funcErrMsg, zap.Error(err),
+			zap.String("method", method),
+			zap.String("url", url),
+			zap.Int("retry", i))
+		time.Sleep(c.RetryInterval)
+	}
 	if err != nil {
 		logger.Error(funcErrMsg, zap.Error(err),
 			zap.String("method", method),

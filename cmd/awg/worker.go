@@ -162,9 +162,11 @@ func (w *Worker) newAwgClient(config config.Config) (*awg.Client, error) {
 	defer logger.Sync()
 
 	htmlClient := cohttp.NewClient(http.Client{},
-		config.MaxConcurrent, config.LogRespHead, nil)
+		config.MaxConcurrent, config.Network.RetryTime,
+		config.Network.RetryInterval, config.LogRespHead, nil)
 	apiClient := cohttp.NewClient(http.Client{},
-		config.MaxConcurrent, config.LogRespHead, w.reporter)
+		config.MaxConcurrent, config.Network.RetryTime,
+		config.Network.RetryInterval, config.LogRespHead, w.reporter)
 	options := github.NewDefaultClientOption()
 	options.AccessToken = config.AccessToken
 	gc, err := github.NewClient(htmlClient, apiClient, options)
