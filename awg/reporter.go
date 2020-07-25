@@ -2,61 +2,50 @@ package awg
 
 import (
 	"sync"
+	"sync/atomic"
 
 	"github.com/rydesun/awesome-github/exch/github"
 )
 
 type Reporter struct {
-	con         int
-	total       int
-	finished    int
-	waiting     int
-	invalid     []github.RepoID
-	finishedLck sync.RWMutex
-	waitingLck  sync.RWMutex
-	invalidLck  sync.Mutex
+	con        int64
+	total      int64
+	finished   int64
+	waiting    int64
+	invalid    []github.RepoID
+	invalidLck sync.Mutex
 }
 
 func (r *Reporter) ConReqNum(num int) {
-	r.con = num
+	atomic.StoreInt64(&r.con, int64(num))
 }
 
 func (r *Reporter) GetConReqNum() int {
-	return r.con
+	return int(atomic.LoadInt64(&r.con))
 }
 
 func (r *Reporter) TotalRepoNum(num int) {
-	r.total = num
+	atomic.StoreInt64(&r.total, int64(num))
 }
 
 func (r *Reporter) GetTotalRepoNum() int {
-	return r.total
+	return int(atomic.LoadInt64(&r.total))
 }
 
 func (r *Reporter) Done() {
-	r.finishedLck.Lock()
-	r.finished += 1
-	r.finishedLck.Unlock()
+	atomic.AddInt64(&r.finished, 1)
 }
 
 func (r *Reporter) GetFinishedRepoNum() int {
-	r.finishedLck.RLock()
-	num := r.finished
-	r.finishedLck.RUnlock()
-	return num
+	return int(atomic.LoadInt64(&r.finished))
 }
 
 func (r *Reporter) RepoWaiting() {
-	r.waitingLck.Lock()
-	r.waiting -= 1
-	r.waitingLck.Unlock()
+	atomic.AddInt64(&r.waiting, -1)
 }
 
 func (r *Reporter) GetWaitingRepo() int {
-	r.waitingLck.RLock()
-	num := r.waiting
-	r.waitingLck.RUnlock()
-	return num
+	return int(atomic.LoadInt64(&r.waiting))
 }
 
 func (r *Reporter) InvalidRepo(id github.RepoID) {
