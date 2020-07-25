@@ -10,7 +10,7 @@ type Error struct {
 	Msg     string
 	Code    ErrCode
 	Scope   ErrScope
-	Obejcts []string
+	Objects []string
 	err     string
 }
 
@@ -19,18 +19,18 @@ func (e Error) Error() string {
 	return string(raw)
 }
 
-func New(msg string, code ErrCode, scope ErrScope, obejcts []string) error {
+func New(msg string, code ErrCode, scope ErrScope, objects []string) error {
 	if len(scope) == 0 {
 		scope = ScopeUnknown
 	}
-	if obejcts == nil {
-		obejcts = []string{}
+	if objects == nil {
+		objects = []string{}
 	}
 	return Error{
 		Msg:     msg,
 		Code:    code,
 		Scope:   scope,
-		Obejcts: obejcts,
+		Objects: objects,
 	}
 }
 
@@ -50,7 +50,7 @@ func Wrap(err error, msg string) error {
 func Check(err error) (errCode ErrCode, errScope ErrScope, objects []string) {
 	e, ok := err.(Error)
 	if ok {
-		return e.Code, e.Scope, e.Obejcts
+		return e.Code, e.Scope, e.Objects
 	} else {
 		return CodeUnknown, ScopeUnknown, []string{}
 	}
