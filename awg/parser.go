@@ -88,7 +88,6 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 
 	// Section -> Index
 	// Item -> Repo
-
 	idxReposMap := make(map[string][]*Repo, len(sectionItemsMap))
 	// TODO: may be different with graphQL node number
 	var jobNum int
@@ -115,9 +114,6 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 		p.reporter.TotalRepoNum(jobNum)
 	}
 
-	// Fetch repositories from remote
-	var wg sync.WaitGroup
-	networkError := make(chan error)
 	idxAwReposMap := make(map[string][]*AwesomeRepo, len(idxReposMap))
 	for idx, repos := range idxReposMap {
 		for cnt, repo := range repos {
@@ -127,10 +123,18 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 				AwesomeDesc: awesomeDesc,
 			}
 			idxAwReposMap[idx] = append(idxAwReposMap[idx], awesomeRepo)
+		}
+	}
+
+	// Fetch repositories from remote
+	var wg sync.WaitGroup
+	networkError := make(chan error)
+	for idx, repos := range idxAwReposMap {
+		for cnt, repo := range repos {
 			wg.Add(1)
-			go func(idx string, cnt int) {
+			go func(repo *AwesomeRepo, idx string, cnt int) {
 				defer wg.Done()
-				err := p.client.Fill(awesomeRepo)
+				err := p.client.Fill(repo)
 				if p.reporter != nil {
 					p.reporter.Done()
 				}
@@ -141,11 +145,11 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 					errMsg := "failed to fill repository info"
 					logger.Error(errMsg, zap.Error(err))
 					if p.reporter != nil {
-						p.reporter.InvalidRepo(awesomeRepo.ID)
+						p.reporter.InvalidRepo(repo.ID)
 					}
 					idxAwReposMap[idx][cnt] = nil
 				}
-			}(idx, cnt)
+			}(repo, idx, cnt)
 		}
 	}
 	jobsCompleted := make(chan interface{})
