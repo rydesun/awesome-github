@@ -17,4 +17,17 @@ jobs:
       with:
         go-version: ${{ matrix.go_version }}
     - name: Test
-      run: go test ./...
+      run: go test -race -covermode atomic -coverprofile=profile.cov ./...
+    - name: Send coverage
+      uses: shogo82148/actions-goveralls@v1
+      with:
+        path-to-profile: profile.cov
+        flag-name: ${{ matrix.os }}  go-${{ matrix.go_version }}
+        parallel: true
+  finish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: shogo82148/actions-goveralls@v1
+        with:
+          parallel-finished: true
