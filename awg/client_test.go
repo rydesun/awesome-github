@@ -50,6 +50,9 @@ func (t *ClientTestEnv) Setup() error {
 				ApiPathPre:  github.APIPathPre,
 				AccessToken: "123456",
 			})
+		if err != nil {
+			return err
+		}
 	} else {
 		gbClient, err = github.NewClient(
 			nil,

@@ -44,7 +44,7 @@ func TestWorkflow(t *testing.T) {
 	require.Less(0, len(result))
 
 	// Test invalid, should have a error.
-	result, err = Workflow(client, nil, github.RepoID{Owner: "invalid", Name: "invalid"},
+	_, err = Workflow(client, nil, github.RepoID{Owner: "invalid", Name: "invalid"},
 		RateLimit{
 			Total:     100000,
 			Remaining: 100000,

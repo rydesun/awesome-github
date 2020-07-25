@@ -28,6 +28,9 @@ func (t *ClientTestEnv) Setup() error {
 	t.testdataHolder = fakeg.NewDataHolder(testdataDir)
 
 	t.apiTestServer, err = fakeg.ApiServer(t.testdataHolder)
+	if err != nil {
+		return err
+	}
 	t.htmlTestServer, err = fakeg.HtmlServer(t.testdataHolder)
 	return err
 }

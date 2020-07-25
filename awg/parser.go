@@ -80,7 +80,6 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 			errMsg := "wired section has no items"
 			logger.Warn(errMsg, zap.Error(err),
 				zap.String("section", sectionName))
-			err = nil
 			continue
 		}
 		sectionItemsMap[sectionName] = itemNodes
@@ -97,7 +96,6 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 			repo, err := p.parseItem(itemNode)
 			if err != nil {
 				logger.Warn("skip invalid item", zap.Error(err))
-				err = nil
 				continue
 			}
 			repos = append(repos, &AwesomeRepo{
