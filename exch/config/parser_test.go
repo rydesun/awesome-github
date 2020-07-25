@@ -1,8 +1,10 @@
 package config
 
 import (
+	"encoding/json"
 	"log"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -33,6 +35,9 @@ func TestGetConfig(t *testing.T) {
 	actual, err := GetConfig(yamlParser)
 	require.Nil(err)
 
+	raw, _ := json.Marshal(actual)
+	t.Logf("get config: %s", raw)
+
 	expected := Config{
 		ConfigPath:    path,
 		AccessToken:   testAccessToken,
@@ -49,7 +54,7 @@ func TestGetConfig(t *testing.T) {
 			RetryInterval: time.Second,
 		},
 		Output: Output{
-			Path: "./awg.json",
+			Path: "awg.json",
 		},
 		Log: Loggers{
 			Main: Logger{
@@ -59,6 +64,13 @@ func TestGetConfig(t *testing.T) {
 				Path: []string{"/tmp/awesome-github.log"},
 			},
 		},
+	}
+	// Check relative path
+	if strings.HasSuffix(actual.ConfigPath, "config.yaml") {
+		expected.ConfigPath = actual.ConfigPath
+	}
+	if strings.HasSuffix(actual.Output.Path, expected.Output.Path) {
+		expected.Output.Path = actual.Output.Path
 	}
 	require.Equal(expected, actual)
 

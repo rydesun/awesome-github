@@ -1,7 +1,6 @@
 package main
 
 import (
-	"path/filepath"
 	"strings"
 
 	"go.uber.org/zap"
@@ -56,7 +55,6 @@ func setLoggers(config config.Config) (*zap.Logger, error) {
 }
 
 func getLoggerConfig(configPath string, config config.Logger) LoggerConfig {
-	configDir := filepath.Dir(configPath)
 	level, ok := map[string]zapcore.Level{
 		"debug": zap.DebugLevel,
 		"info":  zap.InfoLevel,
@@ -68,13 +66,6 @@ func getLoggerConfig(configPath string, config config.Logger) LoggerConfig {
 		level = zap.InfoLevel
 	}
 	path := config.Path
-	for i, p := range path {
-		p = filepath.Clean(p)
-		if !strings.HasPrefix(p, "/") {
-			p = filepath.Join(configDir, p)
-		}
-		path[i] = p
-	}
 	if len(path) == 0 {
 		path = []string{"stderr"}
 	}

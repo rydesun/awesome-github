@@ -3,6 +3,7 @@ package config
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"gopkg.in/yaml.v2"
@@ -15,7 +16,15 @@ type YAMLParser struct {
 }
 
 func NewYAMLParser(fpath string) (*YAMLParser, error) {
-	_, err := os.Stat(fpath)
+	if len(fpath) == 0 {
+		return nil, errcode.New("Invalid config path",
+			ErrCodeParameter, ErrScope, nil)
+	}
+	fpath, err := filepath.Abs(fpath)
+	if err != nil {
+		return nil, err
+	}
+	_, err = os.Stat(fpath)
 	if err != nil {
 		return nil, err
 	}

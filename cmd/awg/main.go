@@ -80,6 +80,5 @@ func parseConfig(configPath string) (config.Config, error) {
 		err = fmt.Errorf("Failed to parse config files. %v", strerr(err))
 		return config.Config{}, err
 	}
-	conf.ConfigPath = configPath
 	return conf, nil
 }
