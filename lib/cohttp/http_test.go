@@ -18,7 +18,7 @@ func init() {
 		}
 		if req.URL.Path == "/text/wrong_path" {
 			rw.WriteHeader(400)
-			rw.Write([]byte("permisson denied"))
+			rw.Write([]byte("permission denied"))
 		}
 		if req.URL.Path == "/json" {
 			rw.Write([]byte(`{"foo": "bar"}`))
@@ -54,7 +54,7 @@ func TestClient_Text(t *testing.T) {
 		},
 		{
 			in:     "/text/wrong_path",
-			out:    "permisson denied",
+			out:    "permission denied",
 			hasErr: true,
 		},
 		{
