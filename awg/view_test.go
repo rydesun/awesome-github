@@ -33,7 +33,9 @@ func TestRepo_Aggregate(t *testing.T) {
 	require.Nil(err)
 	require.Equal(Repo{
 		LastCommit:  lastCommitTime,
+		Watch:       6,
 		Star:        65,
+		Fork:        14,
 		Description: "Go cross-platform glfw library for creating an OpenGL context and receiving events.",
 	}, repo)
 }

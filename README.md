@@ -48,7 +48,9 @@ awg 将一次性获取指定 Awesome List 中的 GitHub 仓库信息，
         "owner": "urfave",
         "awesome_name": "urfave/cli",
         "link": "https://github.com/urfave/cli",
+        "watch": 295,
         "star": 14171,
+        "fork": 1134,
         "last_commit": "2020-07-12T13:32:01Z",
         "description": "A simple, fast, and fun package for building command line apps in Go",
         "awesome_description": "urfave/cli - Simple, fast, and fun package for building command line apps in Go (formerly codegangsta/cli)."

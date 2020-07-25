@@ -12,7 +12,9 @@ type Repo struct {
 	Owner       string        `json:"owner"`
 	AwesomeName string        `json:"awesome_name"`
 	Link        string        `json:"link"`
+	Watch       int           `json:"watch"`
 	Star        int           `json:"star"`
+	Fork        int           `json:"fork"`
 	LastCommit  time.Time     `json:"last_commit"`
 	Description string        `json:"description"`
 }
@@ -30,7 +32,9 @@ func (r *Repo) Aggregate(repo *github.Repo) error {
 			ErrScope, []string{"commit"})
 	}
 	r.LastCommit = commitEdges[0].Node.CommittedDate
+	r.Watch = repo.Data.Repository.Watchers.TotalCount
 	r.Star = repo.Data.Repository.Stargazers.TotalCount
+	r.Fork = repo.Data.Repository.Forks.TotalCount
 	r.Description = repo.Data.Repository.Description
 	return nil
 }
