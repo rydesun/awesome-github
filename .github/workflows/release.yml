@@ -1,0 +1,22 @@
+name: Release
+on: [push]
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Use Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.14
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: release --rm-dist
+          workdir: ./cmd/awg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
