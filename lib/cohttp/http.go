@@ -39,6 +39,8 @@ func NewClient(client http.Client, maxConcurrent int,
 		c:             &client,
 		queue:         queue,
 		MaxConcurrent: maxConcurrent,
+		RetryTime:     retryTime,
+		RetryInterval: retryInterval,
 		logRespHead:   logRespHead,
 		reporter:      reporter,
 	}

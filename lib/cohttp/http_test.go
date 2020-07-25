@@ -62,7 +62,7 @@ func TestClient_Text(t *testing.T) {
 			netErr: true,
 		},
 	}
-	client := NewClient(*testServer.Client(), 16, 2, time.Second, 20, nil)
+	client := NewClient(*testServer.Client(), 16, 0, time.Second, 20, nil)
 	for _, tc := range testCases {
 		t.Run("server"+tc.in, func(t *testing.T) {
 			var url string
@@ -120,7 +120,7 @@ func TestClient_Json(t *testing.T) {
 		},
 	}
 
-	client := NewClient(*testServer.Client(), 16, 2, time.Second, 20, nil)
+	client := NewClient(*testServer.Client(), 16, 0, time.Second, 20, nil)
 	for _, tc := range testCases {
 		t.Run("server"+tc.in, func(t *testing.T) {
 			var url string

@@ -39,7 +39,7 @@ func TestClient_GetUser(t *testing.T) {
 	require.Nil(err)
 
 	testServer := testEnv.apiTestServer
-	apiClient := cohttp.NewClient(*testServer.Client(), 16, 2, time.Second, 20, nil)
+	apiClient := cohttp.NewClient(*testServer.Client(), 16, 0, time.Second, 20, nil)
 
 	testCases := []struct {
 		token  string
@@ -82,7 +82,7 @@ func TestClient_GetRepo(t *testing.T) {
 	require.Nil(err)
 
 	testServer := testEnv.apiTestServer
-	apiClient := cohttp.NewClient(*testServer.Client(), 16, 2, time.Second, 20, nil)
+	apiClient := cohttp.NewClient(*testServer.Client(), 16, 0, time.Second, 20, nil)
 
 	testCases := []struct {
 		repoID RepoID
@@ -129,7 +129,7 @@ func TestClient_GetHTMLReadme(t *testing.T) {
 	require.Nil(err)
 
 	testServer := testEnv.htmlTestServer
-	htmlClient := cohttp.NewClient(*testServer.Client(), 16, 2, time.Second, 20, nil)
+	htmlClient := cohttp.NewClient(*testServer.Client(), 16, 0, time.Second, 20, nil)
 
 	testCases := []struct {
 		repoID RepoID

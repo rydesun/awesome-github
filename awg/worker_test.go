@@ -24,8 +24,8 @@ func TestWorkflow(t *testing.T) {
 	apiServer, err := fakeg.ApiServer(testdataHolder)
 	require.Nil(err)
 	gbClient, err := github.NewClient(
-		cohttp.NewClient(*htmlServer.Client(), 16, 2, time.Second, 20, nil),
-		cohttp.NewClient(*apiServer.Client(), 16, 2, time.Second, 20, nil),
+		cohttp.NewClient(*htmlServer.Client(), 16, 0, time.Second, 20, nil),
+		cohttp.NewClient(*apiServer.Client(), 16, 0, time.Second, 20, nil),
 		github.ClientOption{
 			HTMLHost:    htmlServer.URL,
 			HTMLPathPre: github.HTMLPathPre,
