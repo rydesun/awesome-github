@@ -87,12 +87,12 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 	}
 
 	// Section -> Index
-	// Item -> Repo
-	idxReposMap := make(map[string][]*Repo, len(sectionItemsMap))
+	// Item -> AwesomeRepo
+	idxReposMap := make(map[string][]*AwesomeRepo, len(sectionItemsMap))
 	// TODO: may be different with graphQL node number
 	var jobNum int
 	for sectionName, itemNodes := range sectionItemsMap {
-		repos := make([]*Repo, 0)
+		repos := make([]*AwesomeRepo, 0)
 		for _, itemNode := range itemNodes {
 			repo, err := p.parseItem(itemNode)
 			if err != nil {
@@ -100,7 +100,10 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 				err = nil
 				continue
 			}
-			repos = append(repos, repo)
+			repos = append(repos, &AwesomeRepo{
+				Repo:        *repo,
+				AwesomeDesc: p.getDesc(itemNode),
+			})
 			jobNum++
 		}
 		idxReposMap[sectionName] = repos
@@ -114,22 +117,10 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 		p.reporter.TotalRepoNum(jobNum)
 	}
 
-	idxAwReposMap := make(map[string][]*AwesomeRepo, len(idxReposMap))
-	for idx, repos := range idxReposMap {
-		for cnt, repo := range repos {
-			awesomeDesc := p.getDesc(sectionItemsMap[idx][cnt])
-			awesomeRepo := &AwesomeRepo{
-				Repo:        *repo,
-				AwesomeDesc: awesomeDesc,
-			}
-			idxAwReposMap[idx] = append(idxAwReposMap[idx], awesomeRepo)
-		}
-	}
-
 	// Fetch repositories from remote
 	var wg sync.WaitGroup
 	networkError := make(chan error)
-	for idx, repos := range idxAwReposMap {
+	for idx, repos := range idxReposMap {
 		for cnt, repo := range repos {
 			wg.Add(1)
 			go func(repo *AwesomeRepo, idx string, cnt int) {
@@ -147,7 +138,7 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 					if p.reporter != nil {
 						p.reporter.InvalidRepo(repo.ID)
 					}
-					idxAwReposMap[idx][cnt] = nil
+					idxReposMap[idx][cnt] = nil
 				}
 			}(repo, idx, cnt)
 		}
@@ -162,7 +153,7 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 		errMsg := "Network error occurs"
 		return nil, errcode.Wrap(err, errMsg)
 	case <-jobsCompleted:
-		return p.clean(idxAwReposMap), nil
+		return p.clean(idxReposMap), nil
 	}
 }
 
