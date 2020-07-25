@@ -11,31 +11,34 @@ import (
 )
 
 func strerr(err error) string {
-	code, scope, objects := errcode.Check(err)
-	switch scope {
+	errc, ok := err.(errcode.Error)
+	if !ok {
+		return err.Error()
+	}
+	switch errc.Scope {
 	case awg.ErrScope:
-		switch code {
+		switch errc.Code {
 		case awg.ErrCodeRatelimit:
 			return "Exceed GitHub API ratelimit."
 		}
 	case github.ErrScope:
-		switch code {
+		switch errc.Code {
 		case github.ErrCodeAccessToken:
 			return "Invalid github personal access token."
 		}
 	case config.ErrScope:
-		switch code {
+		switch errc.Code {
 		case config.ErrCodeParameter:
-			return fmt.Sprintf("Invalid config: %v", err)
+			return fmt.Sprintf("Invalid config: %v", errc.Msg)
 		}
 	case cohttp.ErrScope:
-		switch code {
+		switch errc.Code {
 		case cohttp.ErrCodeNetwork:
 			msg := "Network error occurs. Check your network connection."
-			if len(objects) == 0 {
+			if len(errc.Objects) == 0 {
 				return msg
 			}
-			msg = msg + "\n" + objects[0]
+			msg = msg + "\n" + errc.Objects[0]
 			return msg
 		}
 	}

@@ -97,8 +97,8 @@ func (c *Client) GetUser() (*User, error) {
 	err = c.apiClient.Json(req, user)
 	if err != nil {
 		logger.Error(funcErrMsg, zap.Error(err))
-		code, scope, _ := errcode.Check(err)
-		if scope == cohttp.ErrScope && code == 401 {
+		err, ok := err.(errcode.Error)
+		if ok && err.Scope == cohttp.ErrScope && err.Code == 401 {
 			errMsg := "Invalid access token"
 			return nil, errcode.New(errMsg,
 				ErrCodeAccessToken, ErrScope, nil)

@@ -46,12 +46,3 @@ func Wrap(err error, msg string) error {
 		zap.Error(err))
 	return New(msg, CodeUnknown, ScopeUnknown, []string{})
 }
-
-func Check(err error) (errCode ErrCode, errScope ErrScope, objects []string) {
-	e, ok := err.(Error)
-	if ok {
-		return e.Code, e.Scope, e.Objects
-	} else {
-		return CodeUnknown, ScopeUnknown, []string{}
-	}
-}
