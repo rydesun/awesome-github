@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/antchfx/htmlquery v1.2.3
+	github.com/go-playground/validator/v10 v10.3.0
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/schollz/progressbar/v3 v3.3.4
 	github.com/stretchr/testify v1.4.0

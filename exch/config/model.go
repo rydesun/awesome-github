@@ -3,12 +3,15 @@ package config
 import (
 	"time"
 
+	"github.com/go-playground/validator/v10"
+
 	"github.com/rydesun/awesome-github/exch/github"
+	"github.com/rydesun/awesome-github/lib/errcode"
 )
 
 type Config struct {
 	ConfigPath    string `yaml:"config"`
-	AccessToken   string `yaml:"access_token"`
+	AccessToken   string `yaml:"access_token" validate:"required"`
 	MaxConcurrent int    `yaml:"max_concurrent"`
 	LogRespHead   int    `yaml:"log_resp_head"`
 	StartPoint    `yaml:"start_point"`
@@ -20,7 +23,7 @@ type Config struct {
 }
 
 type StartPoint struct {
-	Path          string
+	Path          string `yaml:"path" validate:"required"`
 	ID            github.RepoID
 	SectionFilter []string
 }
@@ -54,7 +57,32 @@ type Loggers struct {
 }
 
 type Logger struct {
-	Level   string
-	Path    []string
-	Console bool
+	Level   string   `yaml:"level"`
+	Path    []string `yaml:"path"`
+	Console bool     `yaml:"console"`
+}
+
+func (c *Config) Validate() error {
+	validate := validator.New()
+	err := validate.Struct(c)
+	if err != nil {
+		return err
+	}
+	if len(c.Github.HTMLHost) > 0 {
+		err := validate.Var(c.Github.HTMLHost, "url")
+		if err != nil {
+			errMsg := "Invalid github html host"
+			return errcode.New(errMsg, ErrCodeParameter, ErrScope,
+				[]string{"githubHTMLHost"})
+		}
+	}
+	if len(c.Github.ApiHost) > 0 {
+		err := validate.Var(c.Github.ApiHost, "url")
+		if err != nil {
+			errMsg := "Invalid github api host"
+			return errcode.New(errMsg, ErrCodeParameter, ErrScope,
+				[]string{"githubAPIHost"})
+		}
+	}
+	return nil
 }

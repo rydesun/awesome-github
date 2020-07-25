@@ -1,7 +1,10 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/rydesun/awesome-github/awg"
+	"github.com/rydesun/awesome-github/exch/config"
 	"github.com/rydesun/awesome-github/exch/github"
 	"github.com/rydesun/awesome-github/lib/cohttp"
 	"github.com/rydesun/awesome-github/lib/errcode"
@@ -19,6 +22,11 @@ func strerr(err error) string {
 		switch code {
 		case github.ErrCodeAccessToken:
 			return "Invalid github personal access token."
+		}
+	case config.ErrScope:
+		switch code {
+		case config.ErrCodeParameter:
+			return fmt.Sprintf("Invalid config: %v", err)
 		}
 	case cohttp.ErrScope:
 		switch code {

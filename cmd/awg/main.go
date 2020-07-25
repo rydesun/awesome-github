@@ -77,7 +77,7 @@ func parseConfig(configPath string) (config.Config, error) {
 
 	conf, err := config.GetConfig(yamlParser)
 	if err != nil {
-		err = fmt.Errorf("Failed to parse config files. %v", err)
+		err = fmt.Errorf("Failed to parse config files. %v", strerr(err))
 		return config.Config{}, err
 	}
 	conf.ConfigPath = configPath
