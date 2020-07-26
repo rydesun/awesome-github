@@ -3,6 +3,7 @@ package awg
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 
@@ -109,7 +110,8 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 	if jobNum > p.ratelimit.Remaining {
 		errMsg := "Exceed GitHub API ratelimit"
 		logger.Warn(errMsg, zap.Error(err))
-		return nil, errcode.New(errMsg, ErrCodeRatelimit, ErrScope, nil)
+		return nil, errcode.New(errMsg, ErrCodeRatelimit, ErrScope,
+			[]string{strconv.Itoa(jobNum)})
 	}
 	if p.reporter != nil {
 		p.reporter.TotalRepoNum(jobNum)

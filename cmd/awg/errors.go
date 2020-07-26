@@ -19,7 +19,8 @@ func strerr(err error) string {
 	case awg.ErrScope:
 		switch errc.Code {
 		case awg.ErrCodeRatelimit:
-			return "Exceed GitHub API ratelimit."
+			msg := "Fetching %s repositories will cause exceeding GitHub API ratelimit."
+			return fmt.Sprintf(msg, errc.Objects[0])
 		}
 	case github.ErrScope:
 		switch errc.Code {
