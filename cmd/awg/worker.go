@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"time"
 
@@ -161,10 +162,24 @@ func (w *Worker) newAwgClient(config config.Config) (*awg.Client, error) {
 	logger := w.logger
 	defer logger.Sync()
 
-	htmlClient := cohttp.NewClient(http.Client{},
+	transport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		ResponseHeaderTimeout: 20 * time.Second, // Main change
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+	}
+	htmlClient := cohttp.NewClient(http.Client{Transport: transport},
 		config.MaxConcurrent, config.Network.RetryTime,
 		config.Network.RetryInterval, config.LogRespHead, nil)
-	apiClient := cohttp.NewClient(http.Client{},
+	apiClient := cohttp.NewClient(http.Client{Transport: transport},
 		config.MaxConcurrent, config.Network.RetryTime,
 		config.Network.RetryInterval, config.LogRespHead, w.reporter)
 
