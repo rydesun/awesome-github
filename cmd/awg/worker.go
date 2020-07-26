@@ -85,8 +85,8 @@ func (w *Worker) Work() error {
 	fmt.Fprintln(writer, "[2/3] Fetch and parse awesome README.md...")
 
 	// Progress bar.
-	var pbCompleted <-chan interface{}
-	var pbCancel chan<- interface{}
+	var pbCompleted <-chan struct{}
+	var pbCancel chan<- struct{}
 	if !w.disableProgressBar {
 		pbCompleted, pbCancel = w.progressBar("[3/3] Fetch repositories from github...")
 	} else {
@@ -98,7 +98,7 @@ func (w *Worker) Work() error {
 	if err != nil {
 		if !w.disableProgressBar {
 			logger.Info("Cancel progress bar.")
-			pbCancel <- nil
+			close(pbCancel)
 			logger.Info("progress bar canceled.")
 		}
 		errMsg := "\nFailed to fetch some repositories."
@@ -194,9 +194,9 @@ func (w *Worker) newAwgClient(config config.Config) (*awg.Client, error) {
 	return client, nil
 }
 
-func (w *Worker) progressBar(prefix string) (completed <-chan interface{}, cancel chan<- interface{}) {
-	pbCompleted := make(chan interface{})
-	pbCancel := make(chan interface{})
+func (w *Worker) progressBar(prefix string) (completed <-chan struct{}, cancel chan<- struct{}) {
+	pbCompleted := make(chan struct{})
+	pbCancel := make(chan struct{})
 
 	// TODO: refactor later
 	getTotalNum := func() (numTotal int, canceled bool) {
@@ -230,13 +230,13 @@ func (w *Worker) progressBar(prefix string) (completed <-chan interface{}, cance
 		for {
 			select {
 			case <-pbCancel:
-				pbCompleted <- nil
+				close(pbCompleted)
 				return
 			case <-ticker.C:
 				numCompleted := w.reporter.GetFinishedRepoNum()
 				if numCompleted >= numTotal {
 					bar.Finish()
-					pbCompleted <- nil
+					close(pbCompleted)
 					return
 				}
 				bar.Set(numCompleted)

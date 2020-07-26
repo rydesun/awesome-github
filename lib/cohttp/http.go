@@ -17,7 +17,7 @@ type Reporter interface {
 
 type Client struct {
 	c             *http.Client
-	queue         chan interface{}
+	queue         chan struct{}
 	MaxConcurrent int
 	RetryTime     int
 	RetryInterval time.Duration
@@ -28,9 +28,9 @@ type Client struct {
 func NewClient(client http.Client, maxConcurrent int,
 	retryTime int, retryInterval time.Duration,
 	logRespHead int, reporter Reporter) *Client {
-	var queue chan interface{}
+	var queue chan struct{}
 	if maxConcurrent > 0 {
-		queue = make(chan interface{}, maxConcurrent)
+		queue = make(chan struct{}, maxConcurrent)
 	}
 	if retryTime < 0 {
 		retryTime = 0
@@ -64,7 +64,7 @@ func (c *Client) Do(req *http.Request) (resp *http.Response, err error) {
 			c.reporter.ConReqNum(1)
 		}
 	} else {
-		c.queue <- nil
+		c.queue <- struct{}{}
 		if c.reporter != nil {
 			c.reporter.ConReqNum(len(c.queue))
 		}

@@ -141,10 +141,10 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 			}(repo, idx, cnt)
 		}
 	}
-	jobsCompleted := make(chan interface{})
+	jobsCompleted := make(chan struct{})
 	go func() {
 		wg.Wait()
-		jobsCompleted <- nil
+		close(jobsCompleted)
 	}()
 	select {
 	case err := <-networkError:
