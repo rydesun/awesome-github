@@ -4,7 +4,7 @@ import (
 	"io/ioutil"
 	"net/http/httptest"
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -27,7 +27,7 @@ func (t *TestEnv) Setup() error {
 	if err != nil {
 		return err
 	}
-	testdataDir := path.Join(wd, "../../test/testdata")
+	testdataDir := filepath.Join(wd, "../../test/testdata")
 	t.testdataHolder = fakeg.NewDataHolder(testdataDir)
 
 	htmlTestServer, err := fakeg.HtmlServer(t.testdataHolder)

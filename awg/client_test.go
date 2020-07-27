@@ -5,7 +5,7 @@ import (
 	"flag"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -34,7 +34,7 @@ func (t *ClientTestEnv) Setup() error {
 	if err != nil {
 		return err
 	}
-	testdataDir := path.Join(wd, "../test/testdata")
+	testdataDir := filepath.Join(wd, "../test/testdata")
 	testdataHolder := fakeg.NewDataHolder(testdataDir)
 	var gbClient *github.Client
 	if !realSrc {

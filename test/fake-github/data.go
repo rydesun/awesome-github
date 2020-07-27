@@ -3,7 +3,7 @@ package fakeg
 import (
 	"fmt"
 	"io/ioutil"
-	"path"
+	"path/filepath"
 )
 
 const apiJsonUserPath = "./api/users/%s.json"
@@ -21,16 +21,16 @@ func NewDataHolder(dir string) DataHolder {
 }
 
 func (h *DataHolder) GetUser() ([]byte, error) {
-	fpath := path.Join(h.dir, fmt.Sprintf(apiJsonUserPath, "tester"))
+	fpath := filepath.Join(h.dir, fmt.Sprintf(apiJsonUserPath, "tester"))
 	return ioutil.ReadFile(fpath)
 }
 
 func (h *DataHolder) GetHtmlAwesomeReadme() ([]byte, error) {
-	fpath := path.Join(h.dir, htmlAwesomeReadmePath)
+	fpath := filepath.Join(h.dir, htmlAwesomeReadmePath)
 	return ioutil.ReadFile(fpath)
 }
 
 func (h *DataHolder) GetJsonRepo(user string, name string) ([]byte, error) {
-	fpath := path.Join(h.dir, fmt.Sprintf(apiJsonRepoPath, user, name))
+	fpath := filepath.Join(h.dir, fmt.Sprintf(apiJsonRepoPath, user, name))
 	return ioutil.ReadFile(fpath)
 }

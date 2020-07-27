@@ -2,7 +2,7 @@ package awg
 
 import (
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -17,7 +17,7 @@ func TestParser_Gather(t *testing.T) {
 	require := require.New(t)
 	wd, err := os.Getwd()
 	require.Nil(err)
-	testdataDir := path.Join(wd, "../test/testdata")
+	testdataDir := filepath.Join(wd, "../test/testdata")
 	testdataHolder := fakeg.NewDataHolder(testdataDir)
 	apiTestServer, err := fakeg.ApiServer(testdataHolder)
 	require.Nil(err)

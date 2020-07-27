@@ -3,7 +3,7 @@ package awg
 import (
 	"encoding/json"
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -17,7 +17,7 @@ func TestRepo_Aggregate(t *testing.T) {
 	require := require.New(t)
 	wd, err := os.Getwd()
 	require.Nil(err)
-	testdataDir := path.Join(wd, "../test/testdata")
+	testdataDir := filepath.Join(wd, "../test/testdata")
 	testdataHolder := fakeg.NewDataHolder(testdataDir)
 	raw, err := testdataHolder.GetJsonRepo("goxjs", "glfw")
 	require.Nil(err)

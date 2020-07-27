@@ -3,7 +3,7 @@ package github
 import (
 	"net/http/httptest"
 	"os"
-	"path"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -24,7 +24,7 @@ func (t *ClientTestEnv) Setup() error {
 	if err != nil {
 		return err
 	}
-	testdataDir := path.Join(wd, "../../test/testdata")
+	testdataDir := filepath.Join(wd, "../../test/testdata")
 	t.testdataHolder = fakeg.NewDataHolder(testdataDir)
 
 	t.apiTestServer, err = fakeg.ApiServer(t.testdataHolder)
