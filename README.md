@@ -62,6 +62,20 @@ awg 将一次性获取指定 Awesome List 中的 GitHub 仓库信息，
 }
 ```
 
+### 数据分析
+
+可以使用任何工具去分析获得的数据文件。
+
+比如在获取 awesome-go 的数据文件`awg.json`后，
+通过使用流行的命令行工具 jq，你可以：
+
+查看 awesome-go 列表中 [Command Line](https://github.com/avelino/awesome-go#command-line)
+一节的内容，并按照仓库的 star 数进行排序
+
+```bash
+cat awg.json | jq '.data | ."Command Line" | sort_by(.star)'
+```
+
 ## 安装
 
 获取命令行工具 awg
@@ -117,20 +131,6 @@ GITHUB_ACCESS_TOKEN=<Your Token> awg fetch --config path/to/config.yaml
 当前 awg 每小时最多查询 5000 个 GitHub 仓库。
 如果查询次数过多，会受到 GitHub 的限制从而导致失败。
 具体信息请参考 [GitHub Resource limitations](https://docs.github.com/en/graphql/overview/resource-limitations#rate-limit)。
-
-## 数据分析
-
-可以使用任何工具去分析获得的数据文件。
-
-比如在获取 awesome-go 的数据文件`awg.json`后，
-通过使用流行的命令行工具 jq，你可以：
-
-查看 awesome-go 列表中 [Command Line](https://github.com/avelino/awesome-go#command-line)
-一节的内容，并按照仓库的 star 数进行排序
-
-```bash
-cat awg.json | jq '.data | ."Command Line" | sort_by(.star)'
-```
 
 ## 注意事项
 
