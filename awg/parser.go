@@ -28,8 +28,7 @@ type Parser struct {
 }
 
 func NewParser(readme string, client *Client, reporter *Reporter,
-	rateLimit RateLimit) (
-	*Parser, error) {
+	rateLimit RateLimit) (*Parser, error) {
 	const funcIntent = "parse awesome html readme page"
 	const funcErrMsg = "failed to " + funcIntent
 	logger := getLogger()
@@ -65,7 +64,41 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 	defer logger.Sync()
 	logger.Debug(funcIntent)
 
-	sectionNodes, err := p.getSections(p.xpathSection)
+	sectionItemsMap, err := p.Parse()
+	if err != nil {
+		return nil, err
+	}
+	if len(sectionItemsMap) == 0 {
+		errMsg := "failed to find any valid sections"
+		logger.Error(errMsg)
+		return nil, errcode.New(errMsg, ErrCodeContent, ErrScope, nil)
+	}
+	total, idxReposMap := p.convert(sectionItemsMap)
+	// TODO: may be different with graphQL node number
+	if total > p.ratelimit.Remaining {
+		errMsg := "Exceed GitHub API ratelimit"
+		logger.Warn(errMsg, zap.Error(err))
+		return nil, errcode.New(errMsg, ErrCodeRatelimit, ErrScope,
+			[]string{strconv.Itoa(total)})
+	}
+	if p.reporter != nil {
+		p.reporter.TotalRepoNum(total)
+	}
+
+	err = p.FetchRepos(idxReposMap)
+	if err != nil {
+		return nil, err
+	}
+	idxReposMap = p.clean(idxReposMap)
+	return idxReposMap, nil
+}
+
+// Get awesome section nodes from awesome README.md
+func (p *Parser) Parse() (map[string][]*html.Node, error) {
+	logger := getLogger()
+	defer logger.Sync()
+
+	sectionNodes, err := htmlquery.QueryAll(p.node, p.xpathSection)
 	if len(sectionNodes) == 0 {
 		errMsg := "awesome html page does not contain any sections"
 		logger.Error(errMsg, zap.Error(err))
@@ -73,6 +106,7 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 			ErrScope, []string{"section"})
 	}
 	logger.Info("get some section nodes", zap.Int("len", len(sectionNodes)))
+
 	sectionItemsMap := make(map[string][]*html.Node, 0)
 	for i, sectionNode := range sectionNodes {
 		sectionName := htmlquery.InnerText(sectionNode)
@@ -85,12 +119,17 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 		}
 		sectionItemsMap[sectionName] = itemNodes
 	}
+	return sectionItemsMap, nil
+}
 
-	// Section -> Index
-	// Item -> AwesomeRepo
-	idxReposMap := make(map[string][]*AwesomeRepo, len(sectionItemsMap))
-	// TODO: may be different with graphQL node number
-	var jobNum int
+// Section -> Index
+// Item -> AwesomeRepo
+func (p *Parser) convert(sectionItemsMap map[string][]*html.Node) (
+	total int, idxReposMap map[string][]*AwesomeRepo) {
+	logger := getLogger()
+	defer logger.Sync()
+	idxReposMap = make(map[string][]*AwesomeRepo, len(sectionItemsMap))
+
 	for sectionName, itemNodes := range sectionItemsMap {
 		repos := make([]*AwesomeRepo, 0)
 		for _, itemNode := range itemNodes {
@@ -103,21 +142,18 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 				Repo:        *repo,
 				AwesomeDesc: p.getDesc(itemNode),
 			})
-			jobNum++
+			total++
 		}
 		idxReposMap[sectionName] = repos
 	}
-	if jobNum > p.ratelimit.Remaining {
-		errMsg := "Exceed GitHub API ratelimit"
-		logger.Warn(errMsg, zap.Error(err))
-		return nil, errcode.New(errMsg, ErrCodeRatelimit, ErrScope,
-			[]string{strconv.Itoa(jobNum)})
-	}
-	if p.reporter != nil {
-		p.reporter.TotalRepoNum(jobNum)
-	}
+	return total, idxReposMap
+}
 
-	// Fetch repositories from remote
+// Fetch repositories from remote.
+func (p *Parser) FetchRepos(idxReposMap map[string][]*AwesomeRepo) error {
+	logger := getLogger()
+	defer logger.Sync()
+
 	var wg sync.WaitGroup
 	networkError := make(chan error)
 	for idx, repos := range idxReposMap {
@@ -151,9 +187,9 @@ func (p *Parser) Gather() (map[string][]*AwesomeRepo, error) {
 	select {
 	case err := <-networkError:
 		errMsg := "Network error occurs"
-		return nil, errcode.Wrap(err, errMsg)
+		return errcode.Wrap(err, errMsg)
 	case <-jobsCompleted:
-		return p.clean(idxReposMap), nil
+		return nil
 	}
 }
 
@@ -169,11 +205,6 @@ func (p *Parser) clean(raw map[string][]*AwesomeRepo) map[string][]*AwesomeRepo 
 		}
 	}
 	return result
-}
-
-// Get awesome section nodes from awesome README.md
-func (p *Parser) getSections(xpath string) ([]*html.Node, error) {
-	return htmlquery.QueryAll(p.node, xpath)
 }
 
 // Get awesome item nodes from awesome section.
