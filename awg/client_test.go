@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -27,6 +28,7 @@ func init() {
 type ClientTestEnv struct {
 	awgClient      *Client
 	testdataHolder fakeg.DataHolder
+	testServer     *httptest.Server
 }
 
 func (t *ClientTestEnv) Setup() error {
@@ -42,6 +44,7 @@ func (t *ClientTestEnv) Setup() error {
 		if err != nil {
 			return err
 		}
+		t.testServer = testServer
 		gbClient, err = github.NewClient(
 			nil,
 			cohttp.NewClient(*testServer.Client(), 16, 0, time.Second, 20, nil),
@@ -76,7 +79,7 @@ func (t *ClientTestEnv) Setup() error {
 	return nil
 }
 
-func TestGithubClient_GetUser(t *testing.T) {
+func TestClient_GetUser(t *testing.T) {
 	require := require.New(t)
 	testEnv := ClientTestEnv{}
 	err := testEnv.Setup()
@@ -88,17 +91,21 @@ func TestGithubClient_GetUser(t *testing.T) {
 		require.Equal("tester", user.Name)
 		require.Equal(5000, user.RateLimit.Total)
 		require.Equal(4999, user.RateLimit.Remaining)
-		require.NotEqual(time.Time{}, user.RateLimit.ResetAt)
+		require.False(user.RateLimit.ResetAt.IsZero())
+
+		testEnv.testServer.Close()
+		_, err = testEnv.awgClient.GetUser()
+		require.NotNil(err)
 	} else {
 		user, err := testEnv.awgClient.GetUser()
 		require.Nil(err)
 		require.NotNil(user.Name)
 		require.Greater(0, user.RateLimit.Total)
-		require.NotEqual(time.Time{}, user.RateLimit.ResetAt)
+		require.False(user.RateLimit.ResetAt.IsZero())
 	}
 }
 
-func TestGithubClient_Fill(t *testing.T) {
+func TestClient_Fill(t *testing.T) {
 	require := require.New(t)
 	testEnv := ClientTestEnv{}
 	err := testEnv.Setup()

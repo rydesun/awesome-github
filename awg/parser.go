@@ -28,22 +28,9 @@ type Parser struct {
 }
 
 func NewParser(readme string, client *Client, reporter *Reporter,
-	rateLimit RateLimit) (*Parser, error) {
-	const funcIntent = "parse awesome html readme page"
-	const funcErrMsg = "failed to " + funcIntent
-	logger := getLogger()
-	defer logger.Sync()
-
-	logger.Debug(funcIntent)
-
-	node, err := htmlquery.Parse(strings.NewReader(readme))
-	if err != nil {
-		errMsg := "failed to recognize readme html page content"
-		logger.Error(errMsg, zap.Error(err))
-		err = errcode.New(errMsg, ErrCodeContent,
-			ErrScope, []string{"readme"})
-		return nil, err
-	}
+	rateLimit RateLimit) *Parser {
+	// Don't worry about this error.
+	node, _ := htmlquery.Parse(strings.NewReader(readme))
 	return &Parser{
 		client:       client,
 		node:         node,
@@ -53,7 +40,7 @@ func NewParser(readme string, client *Client, reporter *Reporter,
 		reLink:       reLink,
 		reporter:     reporter,
 		ratelimit:    rateLimit,
-	}, nil
+	}
 }
 
 // Gather repositories from awesome README.md.

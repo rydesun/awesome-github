@@ -14,10 +14,7 @@ func Workflow(client *Client, reporter *Reporter, awesomeID github.RepoID,
 	if err != nil {
 		return nil, err
 	}
-	readmeParser, err := NewParser(readme, client, reporter, ratelimit)
-	if err != nil {
-		return nil, err
-	}
+	readmeParser := NewParser(readme, client, reporter, ratelimit)
 	awesomeRepos, err = readmeParser.Gather()
 	if err != nil {
 		return nil, err

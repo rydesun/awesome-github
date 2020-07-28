@@ -3,6 +3,7 @@ package awg
 import (
 	"os"
 	"path/filepath"
+	"strconv"
 	"testing"
 	"time"
 
@@ -34,11 +35,10 @@ func TestParser_Gather(t *testing.T) {
 	require.Nil(err)
 	t.Run("", func(t *testing.T) {
 		reporter := &Reporter{}
-		awesomeParser, err := NewParser(string(htmlReadme), client, reporter, RateLimit{
+		awesomeParser := NewParser(string(htmlReadme), client, reporter, RateLimit{
 			Total:     100000,
 			Remaining: 100000,
 		})
-		require.Nil(err)
 		awesomeRepos, err := awesomeParser.Gather()
 		require.Nil(err)
 
@@ -108,36 +108,36 @@ func TestParser_Gather(t *testing.T) {
 				Name:  "repo",
 			}}, reporter.GetInvalidRepo())
 	})
-	// Test invalid README.md
-	t.Run("invalid-1", func(t *testing.T) {
-		reporter := &Reporter{}
-		awesomeParser, err := NewParser("", client, reporter, RateLimit{
-			Total:     100000,
-			Remaining: 100000,
+
+	testcases := []struct {
+		invalidReadme string
+	}{
+		{invalidReadme: ""},
+		{invalidReadme: "<h2><li>"},
+		{invalidReadme: `<html>
+		  <div id="readme">
+		  <article class="markdown-body">
+		    <h2>invalid</h2>
+		    <li>invalid</li>`},
+	}
+	for i, tc := range testcases {
+		t.Run("invalid_readme_"+strconv.Itoa(i), func(t *testing.T) {
+			reporter := &Reporter{}
+			awesomeParser := NewParser(tc.invalidReadme, client, reporter, RateLimit{
+				Total:     100000,
+				Remaining: 100000,
+			})
+			_, err = awesomeParser.Gather()
+			require.NotEqual(nil, err)
 		})
-		require.Equal(nil, err)
-		_, err = awesomeParser.Gather()
-		require.NotEqual(nil, err)
-	})
-	// Test invalid README.md
-	t.Run("invalid-2", func(t *testing.T) {
-		reporter := &Reporter{}
-		awesomeParser, err := NewParser("<h2><li>", client, reporter, RateLimit{
-			Total:     100000,
-			Remaining: 100000,
-		})
-		require.Equal(nil, err)
-		_, err = awesomeParser.Gather()
-		require.NotEqual(nil, err)
-	})
+	}
 	// Test ratelimit
-	t.Run("invalid-3", func(t *testing.T) {
+	t.Run("invalid_ratelimit", func(t *testing.T) {
 		reporter := &Reporter{}
-		awesomeParser, err := NewParser(string(htmlReadme), client, reporter, RateLimit{
+		awesomeParser := NewParser(string(htmlReadme), client, reporter, RateLimit{
 			Total:     100000,
 			Remaining: 0,
 		})
-		require.Nil(err)
 		_, err = awesomeParser.Gather()
 		require.NotNil(err)
 	})
@@ -149,13 +149,12 @@ func TestParser_Gather(t *testing.T) {
 			ApiPathPre: github.APIPathPre,
 		})
 	invalidClient, _ := NewClient(invalidGbClient)
-	t.Run("invalid-4", func(t *testing.T) {
+	t.Run("invalid_network", func(t *testing.T) {
 		reporter := &Reporter{}
-		awesomeParser, err := NewParser(string(htmlReadme), invalidClient, reporter, RateLimit{
+		awesomeParser := NewParser(string(htmlReadme), invalidClient, reporter, RateLimit{
 			Total:     100000,
 			Remaining: 100000,
 		})
-		require.Nil(err)
 		_, err = awesomeParser.Gather()
 		require.NotNil(err)
 		require.True(cohttp.IsNetowrkError(err))

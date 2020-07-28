@@ -50,4 +50,12 @@ func TestWorkflow(t *testing.T) {
 			Remaining: 100000,
 		})
 	require.NotNil(err)
+	// Test network error
+	apiServer.Close()
+	_, err = Workflow(client, nil, github.RepoID{Owner: "tester", Name: "awesome-test"},
+		RateLimit{
+			Total:     100000,
+			Remaining: 100000,
+		})
+	require.NotNil(err)
 }
