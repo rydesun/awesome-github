@@ -47,7 +47,7 @@ func fetch(c *cli.Context) error {
 	}
 
 	// Set loggers right now.
-	logger, err := setLoggers(config)
+	logger, err := setLoggers(config.Log)
 	if err != nil {
 		fmt.Fprintln(writer, err)
 		cli.OsExiter(1)

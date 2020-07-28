@@ -19,10 +19,9 @@ type LoggerConfig struct {
 	Encoding string
 }
 
-func setLoggers(config config.Config) (*zap.Logger, error) {
-	configPath := config.ConfigPath
-	defaultLoggerConfig := getLoggerConfig(configPath, config.Log.Main)
-	httpLoggerConfig := getLoggerConfig(configPath, config.Log.Http)
+func setLoggers(config config.Loggers) (*zap.Logger, error) {
+	defaultLoggerConfig := getLoggerConfig(config.Main)
+	httpLoggerConfig := getLoggerConfig(config.Http)
 	defaultLogger, err := zap.Config{
 		Level:             zap.NewAtomicLevelAt(defaultLoggerConfig.Level),
 		Development:       false,
@@ -54,7 +53,7 @@ func setLoggers(config config.Config) (*zap.Logger, error) {
 	return defaultLogger, nil
 }
 
-func getLoggerConfig(configPath string, config config.Logger) LoggerConfig {
+func getLoggerConfig(config config.Logger) LoggerConfig {
 	level, ok := map[string]zapcore.Level{
 		"debug": zap.DebugLevel,
 		"info":  zap.InfoLevel,
