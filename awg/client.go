@@ -1,6 +1,8 @@
 package awg
 
 import (
+	"context"
+
 	"go.uber.org/zap"
 
 	"github.com/rydesun/awesome-github/exch/github"
@@ -41,7 +43,7 @@ func (c *Client) GetHTMLReadme(id github.RepoID) (string, error) {
 }
 
 // Fill struct repo with more info.
-func (c *Client) Fill(repo *AwesomeRepo) error {
+func (c *Client) Fill(ctx context.Context, repo *AwesomeRepo) error {
 	const funcIntent = "fill struct repo with more info"
 	const funcErrMsg = "failed to " + funcIntent
 	logger := getLogger()
@@ -52,7 +54,7 @@ func (c *Client) Fill(repo *AwesomeRepo) error {
 
 	logger.Debug(funcIntent, zap.String("repo", idStr))
 
-	rawRepo, err := c.gc.GetRepo(id)
+	rawRepo, err := c.gc.GetRepo(ctx, id)
 	if err != nil {
 		logger.Error(funcErrMsg, zap.Error(err),
 			zap.String("repo", idStr))

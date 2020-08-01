@@ -1,6 +1,7 @@
 package awg
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -142,13 +143,15 @@ func (p *Parser) FetchRepos(idxReposMap map[string][]*AwesomeRepo) error {
 	defer logger.Sync()
 
 	var wg sync.WaitGroup
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	networkError := make(chan error)
 	for idx, repos := range idxReposMap {
 		for cnt, repo := range repos {
 			wg.Add(1)
 			go func(repo *AwesomeRepo, idx string, cnt int) {
 				defer wg.Done()
-				err := p.client.Fill(repo)
+				err := p.client.Fill(ctx, repo)
 				if p.reporter != nil {
 					p.reporter.Done()
 				}

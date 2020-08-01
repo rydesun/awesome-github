@@ -2,6 +2,7 @@ package github
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -115,7 +116,7 @@ func (c *Client) GetUser() (*User, error) {
 }
 
 // Get repository information.
-func (c Client) GetRepo(id RepoID) (*Repo, error) {
+func (c Client) GetRepo(ctx context.Context, id RepoID) (*Repo, error) {
 	const funcIntent = "get repo info"
 	const funcErrMsg = "failed to " + funcIntent
 	logger := getLogger()
@@ -128,7 +129,7 @@ func (c Client) GetRepo(id RepoID) (*Repo, error) {
 	url.Path = c.option.ApiPathPre
 
 	query := fmt.Sprintf(QueryRepo, id.Owner, id.Name)
-	req, err := http.NewRequest(http.MethodPost, url.String(),
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url.String(),
 		bytes.NewBufferString(query))
 	if err != nil {
 		errMsg := "failed to create request"

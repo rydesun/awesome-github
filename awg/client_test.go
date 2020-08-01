@@ -1,6 +1,7 @@
 package awg
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"net/http"
@@ -138,7 +139,7 @@ func TestClient_Fill(t *testing.T) {
 					AwesomeName: tc.name,
 				},
 			}
-			err = testEnv.awgClient.Fill(&awesomeRepo)
+			err = testEnv.awgClient.Fill(context.Background(), &awesomeRepo)
 			if err != nil {
 				if tc.hasErr {
 					// expected error

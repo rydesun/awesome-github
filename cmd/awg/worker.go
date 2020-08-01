@@ -12,6 +12,7 @@ import (
 	"github.com/k0kubun/go-ansi"
 	"github.com/schollz/progressbar/v3"
 	"go.uber.org/zap"
+	"golang.org/x/net/context"
 
 	"github.com/rydesun/awesome-github/awg"
 	"github.com/rydesun/awesome-github/exch/config"
@@ -87,9 +88,10 @@ func (w *Worker) Work() error {
 
 	// Progress bar.
 	var pbCompleted <-chan struct{}
-	var pbCancel chan<- struct{}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	if !w.disableProgressBar {
-		pbCompleted, pbCancel = w.progressBar("[3/3] Fetch repositories from github...")
+		pbCompleted = w.progressBar(ctx, "[3/3] Fetch repositories from github...")
 	} else {
 		fmt.Fprintln(writer, "[3/3] Fetch repositories from github...")
 	}
@@ -97,11 +99,6 @@ func (w *Worker) Work() error {
 	// Actual work.
 	awesomeRepos, err := awg.Workflow(w.awgClient, w.reporter, w.repoID, user.RateLimit)
 	if err != nil {
-		if !w.disableProgressBar {
-			logger.Info("Cancel progress bar.")
-			close(pbCancel)
-			logger.Info("progress bar canceled.")
-		}
 		errMsg := "\nFailed to fetch some repositories."
 		fmt.Fprintln(writer, errMsg, strerr(err))
 		logger.Error(errMsg, zap.Error(err))
@@ -209,9 +206,9 @@ func (w *Worker) newAwgClient(config config.Config) (*awg.Client, error) {
 	return client, nil
 }
 
-func (w *Worker) progressBar(prefix string) (completed <-chan struct{}, cancel chan<- struct{}) {
+func (w *Worker) progressBar(ctx context.Context, prefix string) <-chan struct{} {
 	pbCompleted := make(chan struct{})
-	pbCancel := make(chan struct{})
+	defer close(pbCompleted)
 
 	// TODO: refactor later
 	getTotalNum := func() (numTotal int, canceled bool) {
@@ -223,7 +220,7 @@ func (w *Worker) progressBar(prefix string) (completed <-chan struct{}, cancel c
 				if numTotal > 0 {
 					return numTotal, false
 				}
-			case <-pbCancel:
+			case <-ctx.Done():
 				return 0, true
 			}
 		}
@@ -244,19 +241,17 @@ func (w *Worker) progressBar(prefix string) (completed <-chan struct{}, cancel c
 		ticker := time.NewTicker(time.Second)
 		for {
 			select {
-			case <-pbCancel:
-				close(pbCompleted)
+			case <-ctx.Done():
 				return
 			case <-ticker.C:
 				numCompleted := w.reporter.GetFinishedRepoNum()
 				if numCompleted >= numTotal {
 					bar.Finish()
-					close(pbCompleted)
 					return
 				}
 				bar.Set(numCompleted)
 			}
 		}
 	}()
-	return pbCompleted, pbCancel
+	return pbCompleted
 }

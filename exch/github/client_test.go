@@ -1,6 +1,7 @@
 package github
 
 import (
+	"context"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
@@ -114,7 +115,7 @@ func TestClient_GetRepo(t *testing.T) {
 					ApiPathPre: APIPathPre,
 				})
 			require.Nil(err)
-			user, err := client.GetRepo(tc.repoID)
+			user, err := client.GetRepo(context.Background(), tc.repoID)
 			if tc.hasErr {
 				require.NotNil(err)
 			} else {
