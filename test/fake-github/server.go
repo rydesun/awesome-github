@@ -48,6 +48,7 @@ func ApiServer(testdataHolder DataHolder) (testServer *httptest.Server, err erro
 		}
 		// There is no need to implement a GraphQL server
 		raw, err := ioutil.ReadAll(req.Body)
+		defer req.Body.Close()
 		if err != nil {
 			rw.WriteHeader(400)
 			return

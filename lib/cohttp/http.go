@@ -126,6 +126,7 @@ func (c *Client) DoBetter(req *http.Request) (
 		return
 	}
 	rawdata, err = ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
 	if err != nil {
 		errMsg := "failed to read response"
 		logger.Error(errMsg, zap.Error(err))
