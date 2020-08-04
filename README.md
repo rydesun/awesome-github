@@ -71,7 +71,7 @@ awg 将一次性获取指定 Awesome List 中的 GitHub 仓库信息，
 
 #### 浏览器中查看
 
-![Screenshot](https://user-images.githubusercontent.com/19602440/89279771-49ec7500-d637-11ea-9c63-02bcf3246f67.png)
+![Screenshot](https://user-images.githubusercontent.com/19602440/89290996-3fd37200-d649-11ea-8807-a6a117d016f0.png)
 
 ```bash
 # 获取用于处理数据的JS脚本：view.js
@@ -88,7 +88,7 @@ awg view --script view.js --data awg.json avelino/awesome-go
 注意：这不代表着可以离线查看。互联网的连接是必要的。
 
 甚至可以不需要自己获取数据，直接使用他人提供的远程数据文件！
-用`--data`指定一个 URL，例如`https://example.com/awesome-go.json`(这是一个例子)
+用`--data`指定一个 URL，例如`https://example.com/awesome-go.json`(这是一个无效的例子)
 
 ```bash
 # 获取用于处理数据的JS脚本：view.js
