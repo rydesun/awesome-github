@@ -30,7 +30,8 @@
 
 awg 将一次性获取指定 Awesome List 中的 GitHub 仓库信息，
 并输出获取到的数据到指定文件中。
-稍后你可以使用喜欢的数据处理工具，比如 jq 和 python，对这些数据进行分析。
+稍后可以用 awg 生成一个 [浏览器页面](#浏览器中查看) 用于查看，
+或者你也可以使用喜欢的数据处理工具，比如 jq 和 python，对这些数据进行分析。
 
 ![Screenshot](https://user-images.githubusercontent.com/19602440/88459895-f3897480-ce87-11ea-8fe7-13773037c56d.gif)
 
@@ -67,6 +68,27 @@ awg 将一次性获取指定 Awesome List 中的 GitHub 仓库信息，
 可以使用任何工具去分析获得的数据文件。
 
 比如在获取 awesome-go 的数据文件`awg.json`后，
+
+#### 浏览器中查看
+
+![Screenshot](https://user-images.githubusercontent.com/19602440/89279771-49ec7500-d637-11ea-9c63-02bcf3246f67.png)
+
+```bash
+# 获取用于处理数据的JS脚本：view.js
+curl -fLO https://raw.githubusercontent.com/rydesun/awesome-github/master/web/static/js/view.js
+# 启动服务
+awg view --script view.js --data awg.json avelino/awesome-go
+```
+
+向 awg 提供 view.js 和数据文件，
+并且表明数据文件指向的 awesome list 是 avelino/awesome-go，
+这将在本地运行一个简单的 Web 服务器，默认监听在`127.0.0.1:3000`，
+用浏览器打开此页面。可以使用`--listen`指定其它地址。
+
+注意：这不代表着可以离线查看。互联网的连接是必要的。
+
+#### 虚拟终端中查看
+
 通过使用流行的命令行工具 jq，你可以：
 
 查看 awesome-go 列表中 [Command Line](https://github.com/avelino/awesome-go#command-line)
@@ -84,7 +106,7 @@ cat awg.json | jq '.data | ."Command Line" | sort_by(.star)'
 go get github.com/rydesun/awesome-github/cmd/awg
 ```
 
-## 使用
+## 获取数据
 
 在运行 awg 之前，先准备好：
 
