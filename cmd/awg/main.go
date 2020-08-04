@@ -7,6 +7,8 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"github.com/rydesun/awesome-github/exch/config"
+	"github.com/rydesun/awesome-github/exch/github"
+	"github.com/rydesun/awesome-github/web/app"
 )
 
 func main() {
@@ -25,6 +27,30 @@ func main() {
 						Usage:     "YAML config",
 						Required:  true,
 						TakesFile: true,
+					},
+				},
+			},
+			{
+				Name:   "view",
+				Usage:  "View awesome readme in browser",
+				Action: view,
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:      "script",
+						Usage:     "Embedded script",
+						Required:  true,
+						TakesFile: true,
+					},
+					&cli.StringFlag{
+						Name:      "data",
+						Usage:     "Fetched json data",
+						Required:  true,
+						TakesFile: true,
+					},
+					&cli.StringFlag{
+						Name:  "listen",
+						Usage: "Listen address",
+						Value: "127.0.0.1:3000",
 					},
 				},
 			},
@@ -65,6 +91,38 @@ func fetch(c *cli.Context) error {
 	if err != nil {
 		cli.OsExiter(1)
 	}
+	return nil
+}
+
+func view(c *cli.Context) error {
+	// CLI
+	writer := os.Stdout
+
+	if c.Args().Len() == 0 {
+		fmt.Fprintln(writer, "Awesome list name is missing")
+		cli.OsExiter(1)
+	}
+
+	id := c.Args().Get(0)
+	owner, name, err := config.SplitID(id)
+	if err != nil {
+		fmt.Fprintln(writer, err)
+		cli.OsExiter(1)
+	}
+
+	router, err := app.NewRouter(c.String("listen"))
+	if err != nil {
+		fmt.Fprintln(writer, err)
+		cli.OsExiter(1)
+	}
+	scriptPath := c.String("script")
+	dataPath := c.String("data")
+	err = router.Init(github.RepoID{Owner: owner, Name: name}, scriptPath, dataPath)
+	if err != nil {
+		fmt.Fprintln(writer, err)
+		cli.OsExiter(1)
+	}
+	router.Route()
 	return nil
 }
 

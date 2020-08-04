@@ -1,6 +1,7 @@
 package config
 
 import (
+	"strings"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -85,4 +86,13 @@ func (c *Config) Validate() error {
 		}
 	}
 	return nil
+}
+
+func SplitID(id string) (owner, name string, err error) {
+	sliceStr := strings.Split(id, "/")
+	if len(sliceStr) != 2 {
+		return "", "", errcode.New("Invaild path",
+			ErrCodeParameter, ErrScope, []string{"path"})
+	}
+	return sliceStr[0], sliceStr[1], nil
 }

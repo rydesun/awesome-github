@@ -4,7 +4,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"gopkg.in/yaml.v2"
 
@@ -44,13 +43,11 @@ func (p *YAMLParser) Parse() (Config, error) {
 		return config, err
 	}
 	config.ConfigPath = p.fpath
-	path := config.StartPoint.Path
-	sliceStr := strings.Split(path, "/")
-	if len(sliceStr) != 2 {
-		errcode.New("Invaild path",
-			ErrCodeParameter, ErrScope, []string{"path"})
+	owner, name, err := SplitID(config.StartPoint.Path)
+	if err != nil {
+		return config, err
 	}
-	config.StartPoint.ID.Owner = sliceStr[0]
-	config.StartPoint.ID.Name = sliceStr[1]
+	config.StartPoint.ID.Owner = owner
+	config.StartPoint.ID.Name = name
 	return config, nil
 }
