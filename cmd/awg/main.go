@@ -7,7 +7,6 @@ import (
 	"github.com/urfave/cli/v2"
 
 	"github.com/rydesun/awesome-github/exch/config"
-	"github.com/rydesun/awesome-github/exch/github"
 	"github.com/rydesun/awesome-github/web/app"
 )
 
@@ -38,12 +37,6 @@ func main() {
 					&cli.StringFlag{
 						Name:      "script",
 						Usage:     "Embedded script",
-						Required:  true,
-						TakesFile: true,
-					},
-					&cli.StringFlag{
-						Name:      "data",
-						Usage:     "Fetched json data",
 						Required:  true,
 						TakesFile: true,
 					},
@@ -104,10 +97,14 @@ func view(c *cli.Context) error {
 		cli.OsExiter(1)
 	}
 
-	id := c.Args().Get(0)
-	owner, name, err := config.SplitID(id)
+	datafile := c.Args().Get(0)
+	data, err := LoadOutputFile(datafile)
 	if err != nil {
 		fmt.Fprintln(writer, strerr(err))
+		cli.OsExiter(1)
+	}
+	if !data.IsValid() {
+		fmt.Fprintln(writer, "Invalid data")
 		cli.OsExiter(1)
 	}
 
@@ -117,9 +114,9 @@ func view(c *cli.Context) error {
 		cli.OsExiter(1)
 	}
 	scriptPath := c.String("script")
-	dataPath := c.String("data")
+	dataPath := datafile
 	fmt.Fprintln(writer, "[1/2] Fetching remote readme page...")
-	err = router.Init(github.RepoID{Owner: owner, Name: name}, scriptPath, dataPath)
+	err = router.Init(data.AwesomeList, scriptPath, dataPath)
 	if err != nil {
 		fmt.Fprintln(writer, strerr(err))
 		cli.OsExiter(1)

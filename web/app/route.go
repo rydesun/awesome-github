@@ -49,21 +49,16 @@ func (r *Router) Route() error {
 	app := r.app
 	app.Use(cors.New())
 
-	dataPath := r.dataPath
 	scriptPath := r.scriptPath
-	urlData, _ := url.Parse(dataPath)
 	urlScript, _ := url.Parse(scriptPath)
-	if urlData.Scheme != "http" && urlData.Scheme != "https" {
-		app.Static("/data", dataPath)
-		dataPath = "/data"
-	}
 	if urlScript.Scheme != "http" && urlScript.Scheme != "https" {
 		app.Static("/js", scriptPath)
 		scriptPath = "/js"
 	}
+	app.Static("/data", r.dataPath)
 	app.Get("/", func(c *fiber.Ctx) {
 		c.Set("content-type", "text/html; charset=utf-8")
-		c.Send(wrapReadme(r.html, dataPath, scriptPath))
+		c.Send(wrapReadme(r.html, "/data", scriptPath))
 	})
 
 	return app.Listen(r.listen)
