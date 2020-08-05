@@ -112,9 +112,10 @@ func (w *Worker) Work() error {
 
 	// Format data.
 	output := Output{
-		Time:    time.Now(),
-		Data:    awesomeRepos,
-		Invalid: invalidRepos,
+		Time:        time.Now(),
+		AwesomeList: w.repoID,
+		Data:        awesomeRepos,
+		Invalid:     invalidRepos,
 	}
 	outputBytes, err := json.Marshal(output)
 	if err != nil {

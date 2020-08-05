@@ -8,7 +8,8 @@ import (
 )
 
 type Output struct {
-	Time    time.Time                     `json:"time"`
-	Data    map[string][]*awg.AwesomeRepo `json:"data"`
-	Invalid []github.RepoID               `json:"invalid"`
+	Time        time.Time                     `json:"time"`
+	AwesomeList github.RepoID                 `json:"awesome_list"`
+	Data        map[string][]*awg.AwesomeRepo `json:"data"`
+	Invalid     []github.RepoID               `json:"invalid"`
 }
