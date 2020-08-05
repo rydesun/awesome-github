@@ -77,27 +77,14 @@ awg 将一次性获取指定 Awesome List 中的 GitHub 仓库信息，
 # 获取用于处理数据的JS脚本：view.js
 curl -fLO https://raw.githubusercontent.com/rydesun/awesome-github/master/web/static/js/view.js
 # 启动服务
-awg view --script view.js --data awg.json avelino/awesome-go
+awg view --script view.js awg.json
 ```
 
 向 awg 提供 view.js 和数据文件，
-并且表明数据文件指向的 awesome list 是 avelino/awesome-go，
 这将在本地运行一个简单的 Web 服务器，默认监听在`127.0.0.1:3000`，
 用浏览器打开此页面。可以使用`--listen`指定其它地址。
 
 注意：这不代表着可以离线查看。互联网的连接是必要的。
-
-甚至可以不需要自己获取数据，直接使用他人提供的远程数据文件！
-用`--data`指定一个 URL，例如`https://example.com/awesome-go.json`(这是一个无效的例子)
-
-```bash
-# 获取用于处理数据的JS脚本：view.js
-curl -fLO https://raw.githubusercontent.com/rydesun/awesome-github/master/web/static/js/view.js
-# 启动服务
-awg view --script view.js --data https://example.com/awesome-go.json avelino/awesome-go
-```
-
-在指定远程在线的数据文件时，需要在 URL 中加上`http`或者`https`协议，表明来自网络而不是本地。
 
 #### 虚拟终端中查看
 
