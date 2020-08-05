@@ -5,6 +5,7 @@ import (
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 
 	"github.com/rydesun/awesome-github/awg"
 	"github.com/rydesun/awesome-github/exch/config"
@@ -15,36 +16,55 @@ import (
 
 type LoggerConfig struct {
 	Level    zapcore.Level
-	Path     []string
+	Path     string
 	Encoding string
 }
 
 func setLoggers(config config.Loggers) (*zap.Logger, error) {
 	defaultLoggerConfig := getLoggerConfig(config.Main)
 	httpLoggerConfig := getLoggerConfig(config.Http)
-	defaultLogger, err := zap.Config{
-		Level:             zap.NewAtomicLevelAt(defaultLoggerConfig.Level),
-		Development:       false,
-		Encoding:          defaultLoggerConfig.Encoding,
-		EncoderConfig:     zap.NewDevelopmentEncoderConfig(),
-		OutputPaths:       defaultLoggerConfig.Path,
-		ErrorOutputPaths:  defaultLoggerConfig.Path,
-		DisableStacktrace: true,
-	}.Build()
-	if err != nil {
-		return nil, err
+
+	enc := zapcore.NewJSONEncoder(zapcore.EncoderConfig{
+		TimeKey:        "T",
+		LevelKey:       "L",
+		NameKey:        "N",
+		CallerKey:      "C",
+		MessageKey:     "M",
+		StacktraceKey:  "S",
+		LineEnding:     zapcore.DefaultLineEnding,
+		EncodeLevel:    zapcore.LowercaseLevelEncoder,
+		EncodeTime:     zapcore.ISO8601TimeEncoder,
+		EncodeDuration: zapcore.SecondsDurationEncoder,
+		EncodeCaller:   zapcore.ShortCallerEncoder,
+	})
+
+	defaultWriter := zapcore.AddSync(&lumberjack.Logger{
+		Filename:   defaultLoggerConfig.Path,
+		MaxSize:    20,
+		MaxBackups: 1,
+		MaxAge:     28,
+	})
+	defaultLogger := zap.New(
+		zapcore.NewCore(enc, defaultWriter, zap.NewAtomicLevelAt(
+			defaultLoggerConfig.Level)), zap.AddCaller())
+
+	var httpLogger *zap.Logger
+	if httpLoggerConfig.Path == defaultLoggerConfig.Path {
+		httpLogger = zap.New(
+			zapcore.NewCore(enc, defaultWriter, zap.NewAtomicLevelAt(
+				httpLoggerConfig.Level)), zap.AddCaller())
+	} else {
+		httpWriter := zapcore.AddSync(&lumberjack.Logger{
+			Filename:   httpLoggerConfig.Path,
+			MaxSize:    5,
+			MaxBackups: 1,
+			MaxAge:     28,
+		})
+		httpLogger = zap.New(
+			zapcore.NewCore(enc, httpWriter, zap.NewAtomicLevelAt(
+				httpLoggerConfig.Level)), zap.AddCaller())
 	}
-	httpLogger, err := zap.Config{
-		Level:            zap.NewAtomicLevelAt(httpLoggerConfig.Level),
-		Development:      false,
-		Encoding:         httpLoggerConfig.Encoding,
-		EncoderConfig:    zap.NewDevelopmentEncoderConfig(),
-		OutputPaths:      httpLoggerConfig.Path,
-		ErrorOutputPaths: httpLoggerConfig.Path,
-	}.Build()
-	if err != nil {
-		return nil, err
-	}
+
 	awg.SetDefaultLogger(defaultLogger)
 	errcode.SetDefaultLogger(defaultLogger)
 	github.SetDefaultLogger(defaultLogger)
@@ -64,19 +84,8 @@ func getLoggerConfig(config config.Logger) LoggerConfig {
 	if !ok {
 		level = zap.InfoLevel
 	}
-	path := config.Path
-	if len(path) == 0 {
-		path = []string{"stderr"}
-	}
-	var encoding string
-	if config.Console {
-		encoding = "console"
-	} else {
-		encoding = "json"
-	}
 	return LoggerConfig{
-		Level:    level,
-		Path:     path,
-		Encoding: encoding,
+		Level: level,
+		Path:  config.Path,
 	}
 }

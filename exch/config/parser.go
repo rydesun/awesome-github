@@ -31,23 +31,23 @@ func GetConfig(cp ConfigParser) (Config, error) {
 		errMsg := fmt.Sprintf("Failed to Write file. Invalid output path: %s", config.Output.Path)
 		return Config{}, errcode.New(errMsg, ErrCodeParameter, ErrScope, nil)
 	}
-	for i, p := range config.Log.Main.Path {
-		p, err = filepath.Abs(p)
-		if !CheckFileWritable(p) {
-			errMsg := fmt.Sprintf("Failed to Write file. Invalid output path: %s", p)
-			return Config{}, errcode.New(errMsg,
-				ErrCodeParameter, ErrScope, nil)
-		}
-		config.Log.Main.Path[i] = p
-		if err != nil {
-			return Config{}, err
-		}
+	config.Log.Main.Path, err = filepath.Abs(config.Log.Main.Path)
+	if err != nil {
+		return Config{}, err
 	}
-	for i, p := range config.Log.Http.Path {
-		config.Log.Http.Path[i], err = filepath.Abs(p)
-		if err != nil {
-			return Config{}, err
-		}
+	if !CheckFileWritable(config.Log.Main.Path) {
+		errMsg := fmt.Sprintf("Failed to Write file. Invalid output path: %s", config.Log.Main.Path)
+		return Config{}, errcode.New(errMsg,
+			ErrCodeParameter, ErrScope, nil)
+	}
+	config.Log.Http.Path, err = filepath.Abs(config.Log.Http.Path)
+	if err != nil {
+		return Config{}, err
+	}
+	if !CheckFileWritable(config.Log.Http.Path) {
+		errMsg := fmt.Sprintf("Failed to Write file. Invalid output path: %s", config.Log.Http.Path)
+		return Config{}, errcode.New(errMsg,
+			ErrCodeParameter, ErrScope, nil)
 	}
 	err = config.Validate()
 	return config, err

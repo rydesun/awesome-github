@@ -30,12 +30,8 @@ github:
 log:
   ## Main log.
   main:
-    ## default: stderr
-    path:
-      - /tmp/awesome-github.log
+    path: /tmp/awesome-github.log
 
   ## HTTP log.
   http:
-    ## default: stderr
-    path:
-      - /tmp/awesome-github.log
+    path: /tmp/awesome-github.log

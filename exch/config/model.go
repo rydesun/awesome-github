@@ -58,9 +58,9 @@ type Loggers struct {
 }
 
 type Logger struct {
-	Level   string   `yaml:"level"`
-	Path    []string `yaml:"path"`
-	Console bool     `yaml:"console"`
+	Level   string `yaml:"level"`
+	Path    string `yaml:"path"`
+	Console bool   `yaml:"console"`
 }
 
 func (c *Config) Validate() error {

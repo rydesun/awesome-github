@@ -19,10 +19,10 @@ func TestSetLoggers(t *testing.T) {
 	}()
 	mainLogger, err := setLoggers(config.Loggers{
 		Main: config.Logger{
-			Path: []string{tempFile.Name()},
+			Path: tempFile.Name(),
 		},
 		Http: config.Logger{
-			Path: []string{tempFile.Name()},
+			Path: tempFile.Name(),
 		},
 	})
 	require.Nil(err)

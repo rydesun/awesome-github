@@ -58,10 +58,10 @@ func TestGetConfig(t *testing.T) {
 		},
 		Log: Loggers{
 			Main: Logger{
-				Path: []string{"/tmp/awesome-github.log"},
+				Path: "/tmp/awesome-github.log",
 			},
 			Http: Logger{
-				Path: []string{"/tmp/awesome-github.log"},
+				Path: "/tmp/awesome-github.log",
 			},
 		},
 	}
