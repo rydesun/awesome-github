@@ -27,7 +27,9 @@ type Router struct {
 
 func NewRouter(listen string) (*Router, error) {
 	return &Router{
-		app:    fiber.New(),
+		app: fiber.New(&fiber.Settings{
+			DisableStartupMessage: true,
+		}),
 		listen: listen,
 	}, nil
 }
@@ -43,7 +45,7 @@ func (r *Router) Init(repoID github.RepoID, scriptPath, dataPath string) error {
 	return nil
 }
 
-func (r *Router) Route() {
+func (r *Router) Route() error {
 	app := r.app
 	app.Use(cors.New())
 
@@ -64,7 +66,7 @@ func (r *Router) Route() {
 		c.Send(wrapReadme(r.html, dataPath, scriptPath))
 	})
 
-	app.Listen(r.listen)
+	return app.Listen(r.listen)
 }
 
 func FetchHTMLReadme(id github.RepoID) (string, error) {

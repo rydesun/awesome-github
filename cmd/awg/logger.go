@@ -20,6 +20,14 @@ type LoggerConfig struct {
 	Encoding string
 }
 
+func depressLoggers() {
+	nop := zap.NewNop()
+	awg.SetDefaultLogger(nop)
+	errcode.SetDefaultLogger(nop)
+	github.SetDefaultLogger(nop)
+	cohttp.SetDefaultLogger(nop)
+}
+
 func setLoggers(config config.Loggers) (*zap.Logger, error) {
 	defaultLoggerConfig := getLoggerConfig(config.Main)
 	httpLoggerConfig := getLoggerConfig(config.Http)

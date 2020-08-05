@@ -97,6 +97,7 @@ func fetch(c *cli.Context) error {
 func view(c *cli.Context) error {
 	// CLI
 	writer := os.Stdout
+	depressLoggers()
 
 	if c.Args().Len() == 0 {
 		fmt.Fprintln(writer, "Awesome list name is missing")
@@ -106,23 +107,29 @@ func view(c *cli.Context) error {
 	id := c.Args().Get(0)
 	owner, name, err := config.SplitID(id)
 	if err != nil {
-		fmt.Fprintln(writer, err)
+		fmt.Fprintln(writer, strerr(err))
 		cli.OsExiter(1)
 	}
 
 	router, err := app.NewRouter(c.String("listen"))
 	if err != nil {
-		fmt.Fprintln(writer, err)
+		fmt.Fprintln(writer, strerr(err))
 		cli.OsExiter(1)
 	}
 	scriptPath := c.String("script")
 	dataPath := c.String("data")
+	fmt.Fprintln(writer, "[1/2] Fetching remote readme page...")
 	err = router.Init(github.RepoID{Owner: owner, Name: name}, scriptPath, dataPath)
 	if err != nil {
-		fmt.Fprintln(writer, err)
+		fmt.Fprintln(writer, strerr(err))
 		cli.OsExiter(1)
 	}
-	router.Route()
+	fmt.Fprintf(writer, "[2/2] Serve at http://%s\n", c.String("listen"))
+	err = router.Route()
+	if err != nil {
+		fmt.Fprintln(writer, strerr(err))
+		cli.OsExiter(1)
+	}
 	return nil
 }
 
