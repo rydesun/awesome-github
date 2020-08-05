@@ -9,6 +9,7 @@ import (
 const apiJsonUserPath = "./api/users/%s.json"
 const htmlAwesomeReadmePath = "./html/README.html"
 const apiJsonRepoPath = "./api/repos/%s_%s.json"
+const outputPath = "./output/data.json"
 
 type DataHolder struct {
 	dir string
@@ -32,5 +33,10 @@ func (h *DataHolder) GetHtmlAwesomeReadme() ([]byte, error) {
 
 func (h *DataHolder) GetJsonRepo(user string, name string) ([]byte, error) {
 	fpath := filepath.Join(h.dir, fmt.Sprintf(apiJsonRepoPath, user, name))
+	return ioutil.ReadFile(fpath)
+}
+
+func (h *DataHolder) GetOutput() ([]byte, error) {
+	fpath := filepath.Join(h.dir, outputPath)
 	return ioutil.ReadFile(fpath)
 }
