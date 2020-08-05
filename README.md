@@ -71,20 +71,22 @@ awg 将一次性获取指定 Awesome List 中的 GitHub 仓库信息，
 
 #### 浏览器中查看
 
+页面效果如下所示：
+
 ![Screenshot](https://user-images.githubusercontent.com/19602440/89290996-3fd37200-d649-11ea-8807-a6a117d016f0.png)
 
+运行命令
+
 ```bash
-# 获取用于处理数据的JS脚本：view.js
-curl -fLO https://raw.githubusercontent.com/rydesun/awesome-github/master/web/static/js/view.js
-# 启动服务
-awg view --script view.js awg.json
+awg view awg.json
 ```
 
-向 awg 提供 view.js 和数据文件，
 这将在本地运行一个简单的 Web 服务器，默认监听在`127.0.0.1:3000`，
 用浏览器打开此页面。可以使用`--listen`指定其它地址。
 
 注意：这不代表着可以离线查看。互联网的连接是必要的。
+
+想要替换页面实现，可以用`--script`替换内嵌的 JS 脚本地址，支持本地路径。
 
 #### 虚拟终端中查看
 

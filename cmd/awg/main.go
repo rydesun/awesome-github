@@ -35,10 +35,9 @@ func main() {
 				Action: view,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Name:      "script",
-						Usage:     "Embedded script",
-						Required:  true,
-						TakesFile: true,
+						Name:  "script",
+						Usage: "Embedded script",
+						Value: "https://cdn.jsdelivr.net/gh/rydesun/awesome-github/web/static/js/view.js",
 					},
 					&cli.StringFlag{
 						Name:  "listen",
