@@ -1,0 +1,27 @@
+name: Daily Run
+on:
+  schedule:
+    - cron:  '45 0 * * *'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Use Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.14
+      - name: Build
+        run: go build -o dist/awg ./cmd/awg
+      - name: Fetch data
+        run: dist/awg fetch -config configs/config.yaml
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secret.awesome-github }}
+      - name: Upload data
+        uses: actions/upload-artifact@v2
+        with:
+          name: awesome-go
+          path: awg.json
