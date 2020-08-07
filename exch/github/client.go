@@ -215,3 +215,11 @@ func (c *Client) GetHTML(id RepoID, path string) (string, error) {
 	}
 	return content, nil
 }
+
+func IsAbuseError(err error) bool {
+	// TODO: check "abuse" substring
+	if err, ok := err.(errcode.Error); ok {
+		return err.Code == 403
+	}
+	return false
+}

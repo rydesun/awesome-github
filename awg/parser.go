@@ -145,20 +145,30 @@ func (p *Parser) FetchRepos(idxReposMap map[string][]*AwesomeRepo) error {
 	var wg sync.WaitGroup
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	networkError := make(chan error)
+	unacceptedError := make(chan error)
 	for idx, repos := range idxReposMap {
 		for cnt, repo := range repos {
 			wg.Add(1)
 			go func(repo *AwesomeRepo, idx string, cnt int) {
 				defer wg.Done()
 				err := p.client.Fill(ctx, repo)
+
 				if p.reporter != nil {
 					p.reporter.Done()
 				}
 				if err != nil {
 					if cohttp.IsNetowrkError(err) {
-						networkError <- err
+						errMsg := "Network error occurs"
+						err = errcode.Wrap(err, errMsg)
+						unacceptedError <- err
+						return
+					} else if github.IsAbuseError(err) {
+						errMsg := "The frequency of requests is too high. Check max_concurrent"
+						err = errcode.Wrap(err, errMsg)
+						unacceptedError <- err
+						return
 					}
+					// accepted error
 					errMsg := "failed to fill repository info"
 					logger.Error(errMsg, zap.Error(err))
 					if p.reporter != nil {
@@ -175,9 +185,8 @@ func (p *Parser) FetchRepos(idxReposMap map[string][]*AwesomeRepo) error {
 		close(jobsCompleted)
 	}()
 	select {
-	case err := <-networkError:
-		errMsg := "Network error occurs"
-		return errcode.Wrap(err, errMsg)
+	case err := <-unacceptedError:
+		return err
 	case <-jobsCompleted:
 		return nil
 	}
